@@ -17,6 +17,11 @@ const expressAuthenticationRecasted = expressAuthentication as (req: ExRequest, 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+    "TaskStatus": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["OPEN"]},{"dataType":"enum","enums":["ACCEPTED"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["SUBMITTED"]},{"dataType":"enum","enums":["VERIFYING"]},{"dataType":"enum","enums":["COMPLETED"]},{"dataType":"enum","enums":["FAILED"]},{"dataType":"enum","enums":["DISPUTED"]},{"dataType":"enum","enums":["CANCELLED"]},{"dataType":"enum","enums":["EXPIRED"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "TaskResponse": {
         "dataType": "refObject",
         "properties": {
@@ -32,15 +37,15 @@ const models: TsoaRoute.Models = {
             "price": {"dataType":"double","required":true},
             "currency": {"dataType":"string","required":true},
             "timeoutMs": {"dataType":"double","required":true},
-            "status": {"dataType":"string","required":true},
-            "acceptedAt": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "submittedAt": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "completedAt": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "expiresAt": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "status": {"ref":"TaskStatus","required":true},
+            "acceptedAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"enum","enums":[null]}]},
+            "submittedAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"enum","enums":[null]}]},
+            "completedAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"enum","enums":[null]}]},
+            "expiresAt": {"dataType":"union","subSchemas":[{"dataType":"datetime"},{"dataType":"enum","enums":[null]}]},
             "verificationResult": {"dataType":"any"},
             "disputeReason": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "createdAt": {"dataType":"string","required":true},
-            "updatedAt": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"datetime","required":true},
+            "updatedAt": {"dataType":"datetime","required":true},
         },
         "additionalProperties": false,
     },
@@ -109,6 +114,21 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PricingModel": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["PER_CALL"]},{"dataType":"enum","enums":["PER_TASK"]},{"dataType":"enum","enums":["SUBSCRIPTION"]},{"dataType":"enum","enums":["CUSTOM"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AuthMethod": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["API_KEY"]},{"dataType":"enum","enums":["OAUTH2"]},{"dataType":"enum","enums":["BEARER_TOKEN"]},{"dataType":"enum","enums":["NONE"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AgentStatus": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["ACTIVE"]},{"dataType":"enum","enums":["INACTIVE"]},{"dataType":"enum","enums":["SUSPENDED"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AgentResponse": {
         "dataType": "refObject",
         "properties": {
@@ -117,13 +137,13 @@ const models: TsoaRoute.Models = {
             "description": {"dataType":"string"},
             "endpointUrl": {"dataType":"string","required":true},
             "capabilities": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "pricingModel": {"dataType":"string","required":true},
+            "pricingModel": {"ref":"PricingModel","required":true},
             "pricePerUnit": {"dataType":"double","required":true},
             "currency": {"dataType":"string","required":true},
             "slaResponseMs": {"dataType":"double"},
             "slaUptimePct": {"dataType":"double"},
-            "authMethod": {"dataType":"string","required":true},
-            "status": {"dataType":"string","required":true},
+            "authMethod": {"ref":"AuthMethod","required":true},
+            "status": {"ref":"AgentStatus","required":true},
             "reputationScore": {"dataType":"double","required":true},
             "totalTasks": {"dataType":"double","required":true},
             "successRate": {"dataType":"double","required":true},
@@ -178,17 +198,22 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "MetricType": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["TASK_COMPLETED"]},{"dataType":"enum","enums":["TASK_FAILED"]},{"dataType":"enum","enums":["RESPONSE_TIME"]},{"dataType":"enum","enums":["QUALITY_SCORE"]},{"dataType":"enum","enums":["DISPUTE_RAISED"]},{"dataType":"enum","enums":["DISPUTE_RESOLVED"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ReputationEventResponse": {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
             "agentId": {"dataType":"string","required":true},
             "taskContractId": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "metricType": {"dataType":"string","required":true},
+            "metricType": {"ref":"MetricType","required":true},
             "score": {"dataType":"double","required":true},
             "weight": {"dataType":"double","required":true},
             "metadata": {"dataType":"any"},
-            "createdAt": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"datetime","required":true},
         },
         "additionalProperties": false,
     },
@@ -288,7 +313,7 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTaskController_searchTasks: Record<string, TsoaRoute.ParameterSchema> = {
-                status: {"in":"query","name":"status","dataType":"string"},
+                status: {"in":"query","name":"status","ref":"TaskStatus"},
                 buyerAgentId: {"in":"query","name":"buyerAgentId","dataType":"string"},
                 sellerAgentId: {"in":"query","name":"sellerAgentId","dataType":"string"},
                 capability: {"in":"query","name":"capability","dataType":"string"},

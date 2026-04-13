@@ -1,6 +1,7 @@
 import prisma from "../utils/prisma";
 import { generateApiKey } from "../utils/hash";
 import { NotFoundError, ValidationError } from "../utils/errors";
+import { clampPagination } from "../utils/pagination";
 import { Agent, AgentStatus, PricingModel, AuthMethod } from "../types/domain";
 
 export interface CreateAgentInput {
@@ -80,9 +81,9 @@ export class AgentService {
         slaResponseMs: input.slaResponseMs,
         slaUptimePct: input.slaUptimePct,
         authMethod: input.authMethod ?? "API_KEY",
-        metadata: input.metadata ?? undefined,
-        sampleInput: input.sampleInput ?? undefined,
-        sampleOutput: input.sampleOutput ?? undefined,
+        metadata: input.metadata,
+        sampleInput: input.sampleInput,
+        sampleOutput: input.sampleOutput,
         apiKeys: {
           create: {
             ownerId: input.ownerId,
@@ -122,8 +123,7 @@ export class AgentService {
       where.reputationScore = { gte: input.minReputation };
     }
 
-    const take = Math.min(Math.max(1, input.limit ?? 20), 100);
-    const skip = Math.max(0, input.offset ?? 0);
+    const { take, skip } = clampPagination(input.limit, input.offset);
 
     const [agents, total] = await Promise.all([
       prisma.agent.findMany({
@@ -156,14 +156,13 @@ export class AgentService {
         ...(data.slaResponseMs !== undefined && { slaResponseMs: data.slaResponseMs }),
         ...(data.slaUptimePct !== undefined && { slaUptimePct: data.slaUptimePct }),
         ...(data.authMethod && { authMethod: data.authMethod }),
-        ...(data.metadata !== undefined && { metadata: data.metadata ?? undefined }),
-        ...(data.sampleInput !== undefined && { sampleInput: data.sampleInput ?? undefined }),
-        ...(data.sampleOutput !== undefined && { sampleOutput: data.sampleOutput ?? undefined }),
+        ...(data.metadata !== undefined && { metadata: data.metadata }),
+        ...(data.sampleInput !== undefined && { sampleInput: data.sampleInput }),
+        ...(data.sampleOutput !== undefined && { sampleOutput: data.sampleOutput }),
       },
     });
   }
 
-  // Format agent as A2A Agent Card compatible JSON
   toAgentCard(agent: Agent): Record<string, unknown> {
     return {
       id: agent.id,

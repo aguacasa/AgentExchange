@@ -119,7 +119,13 @@ describe("ReputationService", () => {
     it("creates 3 events for a successful task", async () => {
       prismaMock.reputationEvent.findMany.mockResolvedValue([]);
 
-      await service.recordTaskCompletion("agent-1", "task-1", true, 500, 90);
+      await service.recordTaskCompletion({
+        agentId: "agent-1",
+        taskContractId: "task-1",
+        succeeded: true,
+        responseTimeMs: 500,
+        qualityScore: 90,
+      });
 
       expect(prismaMock.reputationEvent.create).toHaveBeenCalledTimes(3);
       const types = prismaMock.reputationEvent.create.mock.calls.map(
@@ -133,7 +139,13 @@ describe("ReputationService", () => {
     it("creates TASK_FAILED event for failed task", async () => {
       prismaMock.reputationEvent.findMany.mockResolvedValue([]);
 
-      await service.recordTaskCompletion("agent-1", "task-1", false, 0, 0);
+      await service.recordTaskCompletion({
+        agentId: "agent-1",
+        taskContractId: "task-1",
+        succeeded: false,
+        responseTimeMs: 0,
+        qualityScore: 0,
+      });
 
       const firstCall = prismaMock.reputationEvent.create.mock.calls[0][0];
       expect(firstCall.data.metricType).toBe("TASK_FAILED");

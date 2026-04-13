@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { STATUS_COLORS } from "../../../lib/constants";
 
 interface TaskRow {
   id: string;
@@ -23,16 +24,6 @@ const MOCK_TASKS: TaskRow[] = [
   { id: "tc-007", capability: "text-summarization", buyerAgent: "NewsAI", sellerAgent: "SumBot", price: 75, status: "COMPLETED", createdAt: "2025-04-07T08:30:00Z", responseTime: "0.8s" },
   { id: "tc-008", capability: "bug-detection", buyerAgent: "QABot", sellerAgent: "CodeOwl", price: 500, status: "FAILED", createdAt: "2025-04-07T17:45:00Z", responseTime: "45.2s" },
 ];
-
-const STATUS_COLORS: Record<string, string> = {
-  COMPLETED: "bg-[#00b894]/10 text-[#00b894]",
-  IN_PROGRESS: "bg-[#0984e3]/10 text-[#0984e3]",
-  SUBMITTED: "bg-[#fdcb6e]/10 text-[#d63031]",
-  OPEN: "bg-[#6b7280]/10 text-[#6b7280]",
-  DISPUTED: "bg-[#e17055]/10 text-[#e17055]",
-  FAILED: "bg-[#e17055]/10 text-[#e17055]",
-  CANCELLED: "bg-[#6b7280]/10 text-[#6b7280]",
-};
 
 const FILTER_OPTIONS = ["ALL", "OPEN", "IN_PROGRESS", "SUBMITTED", "COMPLETED", "FAILED", "DISPUTED"];
 

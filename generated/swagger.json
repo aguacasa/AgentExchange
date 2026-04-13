@@ -7,6 +7,21 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"TaskStatus": {
+				"type": "string",
+				"enum": [
+					"OPEN",
+					"ACCEPTED",
+					"IN_PROGRESS",
+					"SUBMITTED",
+					"VERIFYING",
+					"COMPLETED",
+					"FAILED",
+					"DISPUTED",
+					"CANCELLED",
+					"EXPIRED"
+				]
+			},
 			"TaskResponse": {
 				"properties": {
 					"id": {
@@ -39,22 +54,26 @@
 						"format": "double"
 					},
 					"status": {
-						"type": "string"
+						"$ref": "#/components/schemas/TaskStatus"
 					},
 					"acceptedAt": {
 						"type": "string",
+						"format": "date-time",
 						"nullable": true
 					},
 					"submittedAt": {
 						"type": "string",
+						"format": "date-time",
 						"nullable": true
 					},
 					"completedAt": {
 						"type": "string",
+						"format": "date-time",
 						"nullable": true
 					},
 					"expiresAt": {
 						"type": "string",
+						"format": "date-time",
 						"nullable": true
 					},
 					"verificationResult": {},
@@ -63,10 +82,12 @@
 						"nullable": true
 					},
 					"createdAt": {
-						"type": "string"
+						"type": "string",
+						"format": "date-time"
 					},
 					"updatedAt": {
-						"type": "string"
+						"type": "string",
+						"format": "date-time"
 					}
 				},
 				"required": [
@@ -205,6 +226,32 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"PricingModel": {
+				"type": "string",
+				"enum": [
+					"PER_CALL",
+					"PER_TASK",
+					"SUBSCRIPTION",
+					"CUSTOM"
+				]
+			},
+			"AuthMethod": {
+				"type": "string",
+				"enum": [
+					"API_KEY",
+					"OAUTH2",
+					"BEARER_TOKEN",
+					"NONE"
+				]
+			},
+			"AgentStatus": {
+				"type": "string",
+				"enum": [
+					"ACTIVE",
+					"INACTIVE",
+					"SUSPENDED"
+				]
+			},
 			"AgentResponse": {
 				"properties": {
 					"id": {
@@ -226,7 +273,7 @@
 						"type": "array"
 					},
 					"pricingModel": {
-						"type": "string"
+						"$ref": "#/components/schemas/PricingModel"
 					},
 					"pricePerUnit": {
 						"type": "number",
@@ -244,10 +291,10 @@
 						"format": "double"
 					},
 					"authMethod": {
-						"type": "string"
+						"$ref": "#/components/schemas/AuthMethod"
 					},
 					"status": {
-						"type": "string"
+						"$ref": "#/components/schemas/AgentStatus"
 					},
 					"reputationScore": {
 						"type": "number",
@@ -434,6 +481,17 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"MetricType": {
+				"type": "string",
+				"enum": [
+					"TASK_COMPLETED",
+					"TASK_FAILED",
+					"RESPONSE_TIME",
+					"QUALITY_SCORE",
+					"DISPUTE_RAISED",
+					"DISPUTE_RESOLVED"
+				]
+			},
 			"ReputationEventResponse": {
 				"properties": {
 					"id": {
@@ -447,7 +505,7 @@
 						"nullable": true
 					},
 					"metricType": {
-						"type": "string"
+						"$ref": "#/components/schemas/MetricType"
 					},
 					"score": {
 						"type": "number",
@@ -459,7 +517,8 @@
 					},
 					"metadata": {},
 					"createdAt": {
-						"type": "string"
+						"type": "string",
+						"format": "date-time"
 					}
 				},
 				"required": [
@@ -695,7 +754,7 @@
 						"name": "status",
 						"required": false,
 						"schema": {
-							"type": "string"
+							"$ref": "#/components/schemas/TaskStatus"
 						}
 					},
 					{

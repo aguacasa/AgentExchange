@@ -239,9 +239,13 @@ describe("TaskService", () => {
       await service.verify("task-1", true, { qualityScore: 90 });
 
       expect(mockEscrow.releaseFunds).toHaveBeenCalledWith("task-1");
-      expect(mockReputation.recordTaskCompletion).toHaveBeenCalledWith(
-        "seller-1", "task-1", true, 60000, 90
-      );
+      expect(mockReputation.recordTaskCompletion).toHaveBeenCalledWith({
+        agentId: "seller-1",
+        taskContractId: "task-1",
+        succeeded: true,
+        responseTimeMs: 60000,
+        qualityScore: 90,
+      });
     });
 
     it("on fail: refunds escrow, records failure, sets FAILED", async () => {
@@ -251,9 +255,13 @@ describe("TaskService", () => {
       await service.verify("task-1", false);
 
       expect(mockEscrow.refundFunds).toHaveBeenCalledWith("task-1");
-      expect(mockReputation.recordTaskCompletion).toHaveBeenCalledWith(
-        "seller-1", "task-1", false, 0, 0
-      );
+      expect(mockReputation.recordTaskCompletion).toHaveBeenCalledWith({
+        agentId: "seller-1",
+        taskContractId: "task-1",
+        succeeded: false,
+        responseTimeMs: 0,
+        qualityScore: 0,
+      });
     });
 
     it("rejects non-SUBMITTED tasks", async () => {

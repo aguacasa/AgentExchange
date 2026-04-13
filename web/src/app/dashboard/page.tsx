@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { STATUS_COLORS, formatCents } from "../../lib/constants";
 
 // Mock data for the overview — in production, fetched from API
 const MOCK_STATS = {
@@ -19,19 +20,6 @@ const RECENT_TASKS = [
   { id: "t-4", capability: "data-extraction", seller: "ParsePro", status: "COMPLETED", price: 400, time: "1h ago" },
   { id: "t-5", capability: "image-analysis", seller: "VisionAI", status: "DISPUTED", price: 350, time: "2h ago" },
 ];
-
-const STATUS_COLORS: Record<string, string> = {
-  COMPLETED: "bg-[#00b894]/10 text-[#00b894]",
-  IN_PROGRESS: "bg-[#0984e3]/10 text-[#0984e3]",
-  SUBMITTED: "bg-[#fdcb6e]/10 text-[#d63031]",
-  OPEN: "bg-[#6b7280]/10 text-[#6b7280]",
-  DISPUTED: "bg-[#e17055]/10 text-[#e17055]",
-  FAILED: "bg-[#e17055]/10 text-[#e17055]",
-};
-
-function formatCents(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
-}
 
 export default function DashboardOverview() {
   return (

@@ -1,6 +1,7 @@
 import prisma from "../utils/prisma";
 import { TaskContract, TaskStatus } from "../types/domain";
 import { NotFoundError, ValidationError, ConflictError, ForbiddenError } from "../utils/errors";
+import { clampPagination } from "../utils/pagination";
 import { escrowService } from "./escrow.service";
 import { reputationService } from "./reputation.service";
 
@@ -36,31 +37,24 @@ async function assertCallerOwnsAgent(agentId: string, callerId: string): Promise
 }
 
 async function assertCallerIsParty(task: TaskContract, callerId: string): Promise<void> {
-  // Caller must own either the buyer or seller agent
-  const buyerAgent = await prisma.agent.findUnique({
-    where: { id: task.buyerAgentId },
-    select: { ownerId: true },
-  });
-  if (buyerAgent?.ownerId === callerId) return;
+  // Check if loaded agent relations already have ownerId (avoids extra queries)
+  const taskAny = task as any;
+  if (taskAny.buyerAgent?.ownerId === callerId) return;
+  if (taskAny.sellerAgent?.ownerId === callerId) return;
 
+  // Fallback: fetch owner IDs in parallel
+  const queries: Promise<{ ownerId: string } | null>[] = [
+    prisma.agent.findUnique({ where: { id: task.buyerAgentId }, select: { ownerId: true } }),
+  ];
   if (task.sellerAgentId) {
-    const sellerAgent = await prisma.agent.findUnique({
-      where: { id: task.sellerAgentId },
-      select: { ownerId: true },
-    });
-    if (sellerAgent?.ownerId === callerId) return;
+    queries.push(
+      prisma.agent.findUnique({ where: { id: task.sellerAgentId }, select: { ownerId: true } })
+    );
   }
+  const results = await Promise.all(queries);
+  if (results.some((r) => r?.ownerId === callerId)) return;
 
   throw new ForbiddenError("You are not a party to this task");
-}
-
-// ─── Pagination helpers ──────────────────────────────────────────────────────
-
-function clampPagination(limit?: number, offset?: number) {
-  return {
-    take: Math.min(Math.max(1, limit ?? 20), 100),
-    skip: Math.max(0, offset ?? 0),
-  };
 }
 
 // ─── Service ─────────────────────────────────────────────────────────────────
@@ -86,13 +80,14 @@ export class TaskService {
       }
     }
 
-    // Authorization: caller must own the buyer agent
+    // Authorization + existence check: caller must own the buyer agent
+    // assertCallerOwnsAgent also verifies the agent exists (throws NotFoundError)
     if (callerId) {
       await assertCallerOwnsAgent(input.buyerAgentId, callerId);
+    } else {
+      const buyer = await prisma.agent.findUnique({ where: { id: input.buyerAgentId } });
+      if (!buyer) throw new NotFoundError("Agent", input.buyerAgentId);
     }
-
-    const buyer = await prisma.agent.findUnique({ where: { id: input.buyerAgentId } });
-    if (!buyer) throw new NotFoundError("Agent", input.buyerAgentId);
 
     const timeoutMs = input.timeoutMs ?? 300000;
     const expiresAt = new Date(Date.now() + timeoutMs);
@@ -102,9 +97,9 @@ export class TaskService {
         buyerAgentId: input.buyerAgentId,
         capabilityRequested: input.capabilityRequested.trim(),
         inputSchema: input.inputSchema,
-        inputData: input.inputData ?? undefined,
-        outputSchema: input.outputSchema ?? undefined,
-        qualityCriteria: input.qualityCriteria ?? undefined,
+        inputData: input.inputData,
+        outputSchema: input.outputSchema,
+        qualityCriteria: input.qualityCriteria,
         price: input.price,
         currency: input.currency ?? "USD",
         timeoutMs,
@@ -114,7 +109,7 @@ export class TaskService {
     });
 
     await escrowService.holdFunds(task.id, task.price, task.currency);
-    return task as unknown as TaskContract;
+    return task;
   }
 
   async getById(id: string, callerId?: string): Promise<TaskContract> {
@@ -126,10 +121,10 @@ export class TaskService {
 
     // Authorization: caller must be a party to the task
     if (callerId) {
-      await assertCallerIsParty(task as unknown as TaskContract, callerId);
+      await assertCallerIsParty(task, callerId);
     }
 
-    return task as unknown as TaskContract;
+    return task;
   }
 
   async search(
@@ -148,7 +143,7 @@ export class TaskService {
         where: { ownerId: callerId },
         select: { id: true },
       });
-      const agentIds = callerAgents.map((a: any) => a.id);
+      const agentIds = callerAgents.map((a: { id: string }) => a.id);
       where.OR = [
         { buyerAgentId: { in: agentIds } },
         { sellerAgentId: { in: agentIds } },
@@ -168,7 +163,7 @@ export class TaskService {
       prisma.taskContract.count({ where: where as any }),
     ]);
 
-    return { tasks: tasks as unknown as TaskContract[], total };
+    return { tasks, total };
   }
 
   async accept(taskId: string, sellerAgentId: string, callerId?: string): Promise<TaskContract> {
@@ -192,7 +187,10 @@ export class TaskService {
       throw new ValidationError("An agent cannot accept its own task");
     }
 
-    const seller = await prisma.agent.findUnique({ where: { id: sellerAgentId } });
+    const seller = await prisma.agent.findUnique({
+      where: { id: sellerAgentId },
+      select: { capabilities: true },
+    });
     if (!seller) throw new NotFoundError("Agent", sellerAgentId);
     if (!seller.capabilities.includes(task.capabilityRequested)) {
       throw new ValidationError(`Seller agent does not have capability: ${task.capabilityRequested}`);
@@ -208,7 +206,7 @@ export class TaskService {
           acceptedAt: new Date(),
         },
       });
-      return updated as unknown as TaskContract;
+      return updated;
     } catch (err: any) {
       if (err?.code === "P2025") {
         throw new ConflictError("Task is no longer open for acceptance");
@@ -249,7 +247,7 @@ export class TaskService {
           submittedAt: new Date(),
         },
       });
-      return updated as unknown as TaskContract;
+      return updated;
     } catch (err: any) {
       if (err?.code === "P2025") {
         throw new ConflictError("Task is not in progress");
@@ -282,38 +280,44 @@ export class TaskService {
         ? new Date(task.submittedAt).getTime() - new Date(task.acceptedAt).getTime()
         : 0;
 
-      await reputationService.recordTaskCompletion(
-        task.sellerAgentId!,
-        taskId,
-        true,
+      await reputationService.recordTaskCompletion({
+        agentId: task.sellerAgentId!,
+        taskContractId: taskId,
+        succeeded: true,
         responseTimeMs,
-        (verificationResult as any)?.qualityScore ?? 80
-      );
+        qualityScore: (verificationResult as Record<string, unknown>)?.qualityScore as number ?? 80,
+      });
 
       const updated = await prisma.taskContract.update({
         where: { id: taskId },
         data: {
           status: "COMPLETED",
           completedAt: new Date(),
-          verificationResult: verificationResult ?? undefined,
+          verificationResult: verificationResult,
         },
       });
-      return updated as unknown as TaskContract;
+      return updated;
     } else {
       await escrowService.refundFunds(taskId);
 
       if (task.sellerAgentId) {
-        await reputationService.recordTaskCompletion(task.sellerAgentId, taskId, false, 0, 0);
+        await reputationService.recordTaskCompletion({
+          agentId: task.sellerAgentId,
+          taskContractId: taskId,
+          succeeded: false,
+          responseTimeMs: 0,
+          qualityScore: 0,
+        });
       }
 
       const updated = await prisma.taskContract.update({
         where: { id: taskId },
         data: {
           status: "FAILED",
-          verificationResult: verificationResult ?? undefined,
+          verificationResult: verificationResult,
         },
       });
-      return updated as unknown as TaskContract;
+      return updated;
     }
   }
 
@@ -322,7 +326,7 @@ export class TaskService {
 
     // Authorization: caller must be a party to the task
     if (callerId) {
-      await assertCallerIsParty(task as unknown as TaskContract, callerId);
+      await assertCallerIsParty(task, callerId);
     }
 
     if (!["SUBMITTED", "IN_PROGRESS"].includes(task.status)) {
@@ -342,7 +346,7 @@ export class TaskService {
         disputeReason: reason,
       },
     });
-    return updated as unknown as TaskContract;
+    return updated;
   }
 
   async resolveDispute(
@@ -355,41 +359,36 @@ export class TaskService {
 
     // Authorization: caller must be a party to the task
     if (callerId) {
-      await assertCallerIsParty(task as unknown as TaskContract, callerId);
+      await assertCallerIsParty(task, callerId);
     }
 
     if (task.status !== "DISPUTED") {
       throw new ConflictError(`Cannot resolve: task is not disputed (status: ${task.status})`);
     }
 
-    if (resolution === "release_to_seller") {
+    const releaseToSeller = resolution === "release_to_seller";
+
+    if (releaseToSeller) {
       await escrowService.releaseFunds(taskId);
-      if (task.sellerAgentId) {
-        await reputationService.recordEvent(task.sellerAgentId, taskId, "DISPUTE_RESOLVED", 1);
-      }
-      const updated = await prisma.taskContract.update({
-        where: { id: taskId },
-        data: {
-          status: "COMPLETED",
-          completedAt: new Date(),
-          verificationResult: { disputeResolution: resolution, notes },
-        },
-      });
-      return updated as unknown as TaskContract;
     } else {
       await escrowService.refundFunds(taskId);
-      if (task.sellerAgentId) {
-        await reputationService.recordEvent(task.sellerAgentId, taskId, "DISPUTE_RESOLVED", 0);
-      }
-      const updated = await prisma.taskContract.update({
-        where: { id: taskId },
-        data: {
-          status: "FAILED",
-          verificationResult: { disputeResolution: resolution, notes },
-        },
-      });
-      return updated as unknown as TaskContract;
     }
+
+    if (task.sellerAgentId) {
+      await reputationService.recordEvent(
+        task.sellerAgentId, taskId, "DISPUTE_RESOLVED", releaseToSeller ? 1 : 0
+      );
+    }
+
+    const updated = await prisma.taskContract.update({
+      where: { id: taskId },
+      data: {
+        status: releaseToSeller ? "COMPLETED" : "FAILED",
+        ...(releaseToSeller && { completedAt: new Date() }),
+        verificationResult: { disputeResolution: resolution, notes },
+      },
+    });
+    return updated;
   }
 
   async expireStale(): Promise<number> {
@@ -401,7 +400,7 @@ export class TaskService {
   }
 
   // Internal getById without authorization check (for service-layer use)
-  private async getByIdInternal(id: string): Promise<any> {
+  private async getByIdInternal(id: string): Promise<TaskContract> {
     const task = await prisma.taskContract.findUnique({
       where: { id },
       include: { buyerAgent: true, sellerAgent: true },

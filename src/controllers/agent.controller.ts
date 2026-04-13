@@ -11,12 +11,13 @@ import {
   Security,
   Request,
   SuccessResponse,
-  Example,
 } from "tsoa";
-import { agentService, CreateAgentInput, SearchAgentsInput } from "../services/agent.service";
-import { matchingService, MatchCriteria } from "../services/matching.service";
+import { agentService, CreateAgentInput } from "../services/agent.service";
+import { matchingService } from "../services/matching.service";
 import { reputationService } from "../services/reputation.service";
 import { ForbiddenError } from "../utils/errors";
+import { AgentStatus, PricingModel, AuthMethod, MetricType } from "../types/domain";
+import { AuthenticatedRequest } from "../middleware/auth";
 import { Express } from "express";
 
 interface AgentResponse {
@@ -25,13 +26,13 @@ interface AgentResponse {
   description?: string;
   endpointUrl: string;
   capabilities: string[];
-  pricingModel: string;
+  pricingModel: PricingModel;
   pricePerUnit: number;
   currency: string;
   slaResponseMs?: number;
   slaUptimePct?: number;
-  authMethod: string;
-  status: string;
+  authMethod: AuthMethod;
+  status: AgentStatus;
   reputationScore: number;
   totalTasks: number;
   successRate: number;
@@ -80,11 +81,11 @@ interface ReputationEventResponse {
   id: string;
   agentId: string;
   taskContractId?: string | null;
-  metricType: string;
+  metricType: MetricType;
   score: number;
   weight: number;
   metadata?: unknown;
-  createdAt: string;
+  createdAt: Date;
 }
 
 interface ReputationResponse {
@@ -132,14 +133,14 @@ export class AgentController extends Controller {
     this.setStatus(201);
     // If authenticated, derive ownerId from the API key (ignore body.ownerId)
     // If unauthenticated (bootstrap), generate a unique ownerId
-    const authReq = req as any;
+    const authReq = req as unknown as AuthenticatedRequest;
     const ownerId = authReq.apiKey?.ownerId
       || body.ownerId
       || `owner_${require("crypto").randomUUID()}`;
 
     const input = { ...body, ownerId } as CreateAgentInput;
     const result = await agentService.create(input);
-    return { agent: result.agent as unknown as AgentResponse, apiKey: result.apiKey };
+    return { agent: result.agent as AgentResponse, apiKey: result.apiKey };
   }
 
   /**
@@ -160,11 +161,11 @@ export class AgentController extends Controller {
       minPrice,
       maxPrice,
       minReputation,
-      status: status as any,
+      status,
       limit,
       offset,
     });
-    return result as unknown as { agents: AgentResponse[]; total: number };
+    return result as { agents: AgentResponse[]; total: number };
   }
 
   /**
@@ -186,13 +187,13 @@ export class AgentController extends Controller {
     @Body() body: UpdateAgentBody,
     @Request() req: Express.Request
   ): Promise<AgentResponse> {
-    const authReq = req as any;
+    const authReq = req as unknown as AuthenticatedRequest;
     if (!authReq.apiKey?.ownerId) {
       throw new ForbiddenError("Authentication required to update an agent");
     }
     const ownerId = authReq.apiKey.ownerId;
     const agent = await agentService.update(agentId, ownerId, body as Partial<CreateAgentInput>);
-    return agent as unknown as AgentResponse;
+    return agent as AgentResponse;
   }
 
   /**
@@ -201,7 +202,7 @@ export class AgentController extends Controller {
   @Get("{agentId}/reputation")
   public async getReputation(@Path() agentId: string): Promise<ReputationResponse> {
     const summary = await reputationService.getSummary(agentId);
-    return summary as unknown as ReputationResponse;
+    return summary as ReputationResponse;
   }
 
   /**

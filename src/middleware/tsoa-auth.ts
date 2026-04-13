@@ -1,5 +1,6 @@
 import { Request } from "express";
 import { hashApiKey } from "../utils/hash";
+import { AuthenticatedRequest } from "./auth";
 import prisma from "../utils/prisma";
 
 export async function expressAuthentication(
@@ -26,7 +27,7 @@ export async function expressAuthentication(
     }
 
     // Attach to request for controllers
-    (request as any).apiKey = {
+    (request as AuthenticatedRequest).apiKey = {
       id: apiKey.id,
       ownerId: apiKey.ownerId,
       agentId: apiKey.agentId,

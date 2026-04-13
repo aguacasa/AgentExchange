@@ -13,11 +13,13 @@ import {
 } from "tsoa";
 import { taskService, CreateTaskInput } from "../services/task.service";
 import { ForbiddenError } from "../utils/errors";
+import { TaskStatus } from "../types/domain";
+import { AuthenticatedRequest } from "../middleware/auth";
 import { Express } from "express";
 
 // Helper to extract authenticated caller's ownerId
 function getCallerId(req: Express.Request): string {
-  const authReq = req as any;
+  const authReq = req as unknown as AuthenticatedRequest;
   if (!authReq.apiKey?.ownerId) {
     throw new ForbiddenError("Authentication required");
   }
@@ -72,15 +74,15 @@ interface TaskResponse {
   price: number;
   currency: string;
   timeoutMs: number;
-  status: string;
-  acceptedAt?: string | null;
-  submittedAt?: string | null;
-  completedAt?: string | null;
-  expiresAt?: string | null;
+  status: TaskStatus;
+  acceptedAt?: Date | null;
+  submittedAt?: Date | null;
+  completedAt?: Date | null;
+  expiresAt?: Date | null;
   verificationResult?: unknown;
   disputeReason?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 @Route("tasks")
@@ -101,7 +103,7 @@ export class TaskController extends Controller {
     this.setStatus(201);
     const callerId = getCallerId(req);
     const task = await taskService.create(body as CreateTaskInput, callerId);
-    return task as unknown as TaskResponse;
+    return task as TaskResponse;
   }
 
   /**
@@ -111,7 +113,7 @@ export class TaskController extends Controller {
   @Get()
   @Security("api_key", ["read"])
   public async searchTasks(
-    @Query() status?: string,
+    @Query() status?: TaskStatus,
     @Query() buyerAgentId?: string,
     @Query() sellerAgentId?: string,
     @Query() capability?: string,
@@ -121,14 +123,14 @@ export class TaskController extends Controller {
   ): Promise<{ tasks: TaskResponse[]; total: number }> {
     const callerId = req ? getCallerId(req) : undefined;
     const result = await taskService.search({
-      status: status as any,
+      status,
       buyerAgentId,
       sellerAgentId,
       capability,
       limit,
       offset,
     }, callerId);
-    return result as unknown as { tasks: TaskResponse[]; total: number };
+    return result as { tasks: TaskResponse[]; total: number };
   }
 
   /**
@@ -143,7 +145,7 @@ export class TaskController extends Controller {
   ): Promise<TaskResponse> {
     const callerId = getCallerId(req);
     const task = await taskService.getById(taskId, callerId);
-    return task as unknown as TaskResponse;
+    return task as TaskResponse;
   }
 
   /**
@@ -159,7 +161,7 @@ export class TaskController extends Controller {
   ): Promise<TaskResponse> {
     const callerId = getCallerId(req);
     const task = await taskService.accept(taskId, body.sellerAgentId, callerId);
-    return task as unknown as TaskResponse;
+    return task as TaskResponse;
   }
 
   /**
@@ -175,7 +177,7 @@ export class TaskController extends Controller {
   ): Promise<TaskResponse> {
     const callerId = getCallerId(req);
     const task = await taskService.submit(taskId, body.sellerAgentId, body.outputData, callerId);
-    return task as unknown as TaskResponse;
+    return task as TaskResponse;
   }
 
   /**
@@ -190,7 +192,7 @@ export class TaskController extends Controller {
   ): Promise<TaskResponse> {
     const callerId = getCallerId(req);
     const task = await taskService.verify(taskId, body.passed, body.verificationResult, callerId);
-    return task as unknown as TaskResponse;
+    return task as TaskResponse;
   }
 
   /**
@@ -205,7 +207,7 @@ export class TaskController extends Controller {
   ): Promise<TaskResponse> {
     const callerId = getCallerId(req);
     const task = await taskService.dispute(taskId, body.reason, callerId);
-    return task as unknown as TaskResponse;
+    return task as TaskResponse;
   }
 
   /**
@@ -220,6 +222,6 @@ export class TaskController extends Controller {
   ): Promise<TaskResponse> {
     const callerId = getCallerId(req);
     const task = await taskService.resolveDispute(taskId, body.resolution, body.notes, callerId);
-    return task as unknown as TaskResponse;
+    return task as TaskResponse;
   }
 }

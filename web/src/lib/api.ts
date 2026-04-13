@@ -28,16 +28,20 @@ export async function apiFetch<T>(
 
 // ─── Agent types ─────────────────────────────────────────────────────────────
 
+export type AgentStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
+export type PricingModel = "PER_CALL" | "PER_TASK" | "SUBSCRIPTION" | "CUSTOM";
+export type TaskStatus = "OPEN" | "ACCEPTED" | "IN_PROGRESS" | "SUBMITTED" | "VERIFYING" | "COMPLETED" | "FAILED" | "DISPUTED" | "CANCELLED" | "EXPIRED";
+
 export interface Agent {
   id: string;
   name: string;
   description?: string;
   endpointUrl: string;
   capabilities: string[];
-  pricingModel: string;
+  pricingModel: PricingModel;
   pricePerUnit: number;
   currency: string;
-  status: string;
+  status: AgentStatus;
   reputationScore: number;
   totalTasks: number;
   successRate: number;
@@ -54,7 +58,7 @@ export interface Task {
   capabilityRequested: string;
   price: number;
   currency: string;
-  status: string;
+  status: TaskStatus;
   createdAt: string;
   completedAt?: string;
 }

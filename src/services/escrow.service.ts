@@ -1,6 +1,6 @@
 import prisma from "../utils/prisma";
 import { getPaymentProvider } from "../providers/payment";
-import { Transaction } from "../types/domain";
+import { Transaction, PaymentMethod } from "../types/domain";
 import { AppError } from "../utils/errors";
 
 export class EscrowService {
@@ -21,7 +21,7 @@ export class EscrowService {
         taskContractId,
         amount,
         currency,
-        paymentMethod: provider.name.toUpperCase() as any,
+        paymentMethod: provider.name.toUpperCase() as PaymentMethod,
         escrowStatus: "HELD",
         externalRef: result.externalRef,
       },

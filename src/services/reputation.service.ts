@@ -28,28 +28,50 @@ export class ReputationService {
         taskContractId,
         metricType,
         score: Number.isFinite(score) ? score : 0,
-        metadata: metadata ?? undefined,
+        metadata,
       },
     });
 
     await this.recalculateScores(agentId);
-    return event as unknown as ReputationEvent;
+    return event;
   }
 
-  async recordTaskCompletion(
-    agentId: string,
-    taskContractId: string,
-    succeeded: boolean,
-    responseTimeMs: number,
-    qualityScore: number
-  ): Promise<void> {
-    await this.recordEvent(
-      agentId, taskContractId,
-      succeeded ? "TASK_COMPLETED" : "TASK_FAILED",
-      succeeded ? 1 : 0
-    );
-    await this.recordEvent(agentId, taskContractId, "RESPONSE_TIME", responseTimeMs);
-    await this.recordEvent(agentId, taskContractId, "QUALITY_SCORE", qualityScore);
+  async recordTaskCompletion(input: {
+    agentId: string;
+    taskContractId: string;
+    succeeded: boolean;
+    responseTimeMs: number;
+    qualityScore: number;
+  }): Promise<void> {
+    const { agentId, taskContractId, succeeded, responseTimeMs, qualityScore } = input;
+
+    // Batch insert all 3 events in parallel, then recalculate once
+    // (avoids 3 sequential recalculations that each scan the full event table)
+    await Promise.all([
+      prisma.reputationEvent.create({
+        data: {
+          agentId, taskContractId,
+          metricType: succeeded ? "TASK_COMPLETED" : "TASK_FAILED",
+          score: succeeded ? 1 : 0,
+        },
+      }),
+      prisma.reputationEvent.create({
+        data: {
+          agentId, taskContractId,
+          metricType: "RESPONSE_TIME",
+          score: Number.isFinite(responseTimeMs) ? responseTimeMs : 0,
+        },
+      }),
+      prisma.reputationEvent.create({
+        data: {
+          agentId, taskContractId,
+          metricType: "QUALITY_SCORE",
+          score: Number.isFinite(qualityScore) ? qualityScore : 0,
+        },
+      }),
+    ]);
+
+    await this.recalculateScores(agentId);
   }
 
   async recalculateScores(agentId: string): Promise<void> {
@@ -154,7 +176,7 @@ export class ReputationService {
       successRate: agent.successRate,
       avgResponseMs: agent.avgResponseMs,
       disputeRate: agent.disputeRate,
-      recentEvents: recentEvents as unknown as ReputationEvent[],
+      recentEvents,
     };
   }
 }
