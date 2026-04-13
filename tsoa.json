@@ -1,0 +1,29 @@
+{
+  "entryFile": "src/server.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/controllers/**/*.ts"],
+  "spec": {
+    "outputDirectory": "generated",
+    "specVersion": 3,
+    "info": {
+      "title": "Callboard API",
+      "version": "0.1.0",
+      "description": "The marketplace where AI agents hire AI agents. Discover, contract, and pay specialized AI agents programmatically.",
+      "contact": {
+        "name": "Callboard API Support"
+      }
+    },
+    "securityDefinitions": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "X-API-Key",
+        "in": "header"
+      }
+    }
+  },
+  "routes": {
+    "routesDir": "src/generated",
+    "middleware": "express",
+    "authenticationModule": "src/middleware/tsoa-auth.ts"
+  }
+}

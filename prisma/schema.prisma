@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Agent ───────────────────────────────────────────────────────────────────
+
+enum AgentStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum PricingModel {
+  PER_CALL
+  PER_TASK
+  SUBSCRIPTION
+  CUSTOM
+}
+
+enum AuthMethod {
+  API_KEY
+  OAUTH2
+  BEARER_TOKEN
+  NONE
+}
+
+model Agent {
+  id              String       @id @default(uuid())
+  name            String
+  description     String?
+  ownerId         String       @map("owner_id")
+  endpointUrl     String       @map("endpoint_url")
+  capabilities    String[]     // e.g. ["text-summarization", "code-review", "translation"]
+  pricingModel    PricingModel @default(PER_TASK) @map("pricing_model")
+  pricePerUnit    Int          @default(0) @map("price_per_unit") // in cents
+  currency        String       @default("USD")
+  slaResponseMs   Int?         @map("sla_response_ms") // max response time SLA in milliseconds
+  slaUptimePct    Float?       @map("sla_uptime_pct")  // e.g. 99.9
+  authMethod      AuthMethod   @default(API_KEY) @map("auth_method")
+  status          AgentStatus  @default(ACTIVE)
+  metadata        Json?        // flexible A2A Agent Card extensions
+  sampleInput     Json?        @map("sample_input")
+  sampleOutput    Json?        @map("sample_output")
+
+  // Reputation (denormalized for fast queries)
+  reputationScore Float        @default(0) @map("reputation_score") // 0-100
+  totalTasks      Int          @default(0) @map("total_tasks")
+  successRate     Float        @default(0) @map("success_rate")     // 0-1
+  avgResponseMs   Float        @default(0) @map("avg_response_ms")
+  disputeRate     Float        @default(0) @map("dispute_rate")     // 0-1
+
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  apiKeys          ApiKey[]
+  buyerContracts   TaskContract[] @relation("BuyerAgent")
+  sellerContracts  TaskContract[] @relation("SellerAgent")
+  reputationEvents ReputationEvent[]
+
+  @@index([status, reputationScore(sort: Desc)])
+  @@index([capabilities])
+  @@index([ownerId])
+  @@map("agents")
+}
+
+// ─── API Keys ────────────────────────────────────────────────────────────────
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  agentId     String?  @map("agent_id")
+  ownerId     String   @map("owner_id")
+  keyHash     String   @unique @map("key_hash")
+  keyPrefix   String   @map("key_prefix") // first 8 chars for identification
+  label       String?
+  scopes      String[] @default(["read", "write"]) // permissions
+  lastUsedAt  DateTime? @map("last_used_at")
+  expiresAt   DateTime? @map("expires_at")
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  agent       Agent?   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([keyHash])
+  @@index([ownerId])
+  @@map("api_keys")
+}
+
+// ─── Task Contract ───────────────────────────────────────────────────────────
+
+enum TaskStatus {
+  OPEN          // buyer posted, awaiting seller
+  ACCEPTED      // seller accepted
+  IN_PROGRESS   // seller is working
+  SUBMITTED     // seller submitted output
+  VERIFYING     // output being verified
+  COMPLETED     // verified and payment released
+  FAILED        // verification failed
+  DISPUTED      // dispute raised
+  CANCELLED     // cancelled by buyer before acceptance
+  EXPIRED       // timed out
+}
+
+model TaskContract {
+  id                  String     @id @default(uuid())
+  buyerAgentId        String     @map("buyer_agent_id")
+  sellerAgentId       String?    @map("seller_agent_id") // null until accepted
+  capabilityRequested String     @map("capability_requested")
+  inputSchema         Json       @map("input_schema")
+  inputData           Json?      @map("input_data")
+  outputSchema        Json?      @map("output_schema")
+  outputData          Json?      @map("output_data")
+  qualityCriteria     Json?      @map("quality_criteria")
+  price               Int        // in cents
+  currency            String     @default("USD")
+  timeoutMs           Int        @default(300000) @map("timeout_ms") // 5 min default
+  status              TaskStatus @default(OPEN)
+  acceptedAt          DateTime?  @map("accepted_at")
+  submittedAt         DateTime?  @map("submitted_at")
+  completedAt         DateTime?  @map("completed_at")
+  expiresAt           DateTime?  @map("expires_at")
+  verificationResult  Json?      @map("verification_result")
+  disputeReason       String?    @map("dispute_reason")
+
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  buyerAgent    Agent        @relation("BuyerAgent", fields: [buyerAgentId], references: [id])
+  sellerAgent   Agent?       @relation("SellerAgent", fields: [sellerAgentId], references: [id])
+  transactions  Transaction[]
+  reputationEvents ReputationEvent[]
+
+  @@index([status])
+  @@index([buyerAgentId])
+  @@index([sellerAgentId])
+  @@index([capabilityRequested])
+  @@map("task_contracts")
+}
+
+// ─── Transaction (Escrow) ────────────────────────────────────────────────────
+
+enum EscrowStatus {
+  HELD          // funds locked in escrow
+  RELEASED      // paid to seller
+  REFUNDED      // returned to buyer
+  DISPUTED      // frozen pending resolution
+}
+
+enum PaymentMethod {
+  MOCK          // for development
+  STRIPE
+  USDC
+  SKYFIRE
+}
+
+model Transaction {
+  id              String        @id @default(uuid())
+  taskContractId  String        @map("task_contract_id")
+  amount          Int           // in cents
+  currency        String        @default("USD")
+  paymentMethod   PaymentMethod @default(MOCK) @map("payment_method")
+  escrowStatus    EscrowStatus  @default(HELD) @map("escrow_status")
+  externalRef     String?       @map("external_ref") // Stripe charge ID, tx hash, etc.
+  releasedAt      DateTime?     @map("released_at")
+  refundedAt      DateTime?     @map("refunded_at")
+  disputeReason   String?       @map("dispute_reason")
+  metadata        Json?
+
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  taskContract    TaskContract  @relation(fields: [taskContractId], references: [id])
+
+  @@index([taskContractId])
+  @@index([escrowStatus])
+  @@map("transactions")
+}
+
+// ─── Reputation Events ───────────────────────────────────────────────────────
+
+enum MetricType {
+  TASK_COMPLETED
+  TASK_FAILED
+  RESPONSE_TIME
+  QUALITY_SCORE
+  DISPUTE_RAISED
+  DISPUTE_RESOLVED
+}
+
+model ReputationEvent {
+  id              String      @id @default(uuid())
+  agentId         String      @map("agent_id")
+  taskContractId  String?     @map("task_contract_id")
+  metricType      MetricType  @map("metric_type")
+  score           Float       // 0-100 for quality, ms for response time, 0/1 for binary
+  weight          Float       @default(1.0) // for EMA weighting
+  metadata        Json?
+
+  createdAt       DateTime    @default(now()) @map("created_at")
+
+  agent           Agent       @relation(fields: [agentId], references: [id])
+  taskContract    TaskContract? @relation(fields: [taskContractId], references: [id])
+
+  @@index([agentId, createdAt(sort: Desc)])
+  @@index([metricType])
+  @@map("reputation_events")
+}

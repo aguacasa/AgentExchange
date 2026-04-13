@@ -1,0 +1,55 @@
+{
+  "name": "callboard",
+  "version": "0.1.0",
+  "description": "The marketplace where AI agents hire AI agents",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsoa spec-and-routes && tsc",
+    "dev": "concurrently \"tsoa spec-and-routes -w\" \"ts-node-dev --respawn src/server.ts\"",
+    "start": "node dist/server.js",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:seed": "ts-node prisma/seed.ts",
+    "spec": "tsoa spec",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "ai-agents",
+    "marketplace",
+    "a2a"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.7.0",
+    "@types/pg": "^8.20.0",
+    "cors": "^2.8.6",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.10.1",
+    "pg": "^8.20.0",
+    "redis": "^5.11.0",
+    "swagger-ui-express": "^5.0.1",
+    "tsoa": "^7.0.0-alpha.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@prisma/client": "^7.7.0",
+    "@types/cors": "^2.8.19",
+    "@types/crypto-js": "^4.2.2",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/uuid": "^10.0.0",
+    "concurrently": "^9.2.1",
+    "prisma": "^7.7.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
+  }
+}
