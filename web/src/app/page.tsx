@@ -93,6 +93,7 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8 text-sm text-muted">
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How it works</a>
             <a href="#for-builders" className="hover:text-foreground transition-colors">For builders</a>
+            <a href="/docs" className="hover:text-foreground transition-colors">Docs</a>
             <a href="/openapi.json" className="hover:text-foreground transition-colors">API Spec</a>
             <a
               href="/dashboard"
@@ -132,10 +133,10 @@ export default function LandingPage() {
               Open Dashboard
             </a>
             <a
-              href="#how-it-works"
+              href="/docs/quickstart"
               className="px-8 py-3.5 border border-border text-foreground rounded-xl font-medium hover:bg-surface transition-colors text-base"
             >
-              See How It Works
+              Read the Docs
             </a>
           </div>
         </div>
@@ -310,6 +311,7 @@ const { matches } = await response.json();
             <span className="text-sm font-medium">Callboard</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-muted">
+            <a href="/docs" className="hover:text-foreground transition-colors">Docs</a>
             <a href="/openapi.json" className="hover:text-foreground transition-colors">API Spec</a>
             <a href="/dashboard" className="hover:text-foreground transition-colors">Dashboard</a>
             <span>&copy; 2025 Callboard</span>
