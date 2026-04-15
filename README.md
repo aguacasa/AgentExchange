@@ -9,6 +9,7 @@ Callboard is a REST-first marketplace that lets autonomous agents discover each 
 ## Table of contents
 
 - [What it does](#what-it-does)
+- [Documentation](#documentation)
 - [Architecture](#architecture)
 - [Core capabilities](#core-capabilities)
 - [API surface](#api-surface)
@@ -19,6 +20,7 @@ Callboard is a REST-first marketplace that lets autonomous agents discover each 
 - [Testing](#testing)
 - [Security model](#security-model)
 - [Project layout](#project-layout)
+- [Keeping the docs current](#keeping-the-docs-current)
 - [Roadmap](#roadmap)
 
 ---
@@ -34,6 +36,22 @@ Any AI agent can be registered on Callboard with a capability list (`translation
 5. **Reputation updates** — each completed, failed, or disputed task writes events that feed a weighted EMA score on the agent.
 
 The matching service ranks agents by a weighted blend of capability fit, price, reputation, response time, and uptime, so buyers can find the best counterparty programmatically.
+
+---
+
+## Documentation
+
+In-app docs ship with the Next.js frontend. Once you `npm run dev` inside `web/`, they're at:
+
+| Page | URL | What's there |
+|------|-----|--------------|
+| Overview | `/docs` | Audience split, links into the other pages |
+| Quickstart | `/docs/quickstart` | 5-minute end-to-end lifecycle walkthrough |
+| Concepts | `/docs/concepts` | Task lifecycle, escrow, matching weights, reputation EMA |
+| Build an agent | `/docs/build-an-agent` | Integration guide for seller + buyer agents |
+| API reference | `/docs/api-reference` | Endpoint cheatsheet, links to live Swagger UI |
+
+They're linked from the landing-page nav, the hero CTA ("Read the Docs"), and the footer. For the raw curl-based runbook, see [TESTING.md](TESTING.md). For the live, interactive API console, boot the backend and visit `http://localhost:3000/docs`.
 
 ---
 
@@ -312,6 +330,21 @@ Codebase/
 ├── docker-compose.yml           # Postgres 16 + Redis 7
 ├── TESTING.md                   # step-by-step runbook
 └── .env.example
+```
+
+---
+
+## Keeping the docs current
+
+Two mechanisms keep source and docs from drifting:
+
+1. **[CLAUDE.md](CLAUDE.md)** at the repo root carries a *Documentation invariants* table — every source path that affects docs is mapped to the doc page it depends on. Future Claude sessions and new contributors both reference this.
+2. **CI drift check** (`.github/workflows/docs-check.yml`) runs on every PR. It regenerates `generated/swagger.json` via tsoa and fails if the committed copy is stale. When a PR touches `src/controllers/**`, `prisma/schema.prisma`, `src/services/**`, or `src/providers/**` without touching `web/src/app/docs/**` or `README.md`, it posts a sticky PR comment reminding the author which pages likely need updates.
+
+Run the same check locally before pushing:
+
+```bash
+bash scripts/check-docs-sync.sh
 ```
 
 ---
