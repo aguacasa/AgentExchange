@@ -8,6 +8,7 @@ import rateLimit from "express-rate-limit";
 import swaggerUi from "swagger-ui-express";
 import { RegisterRoutes } from "./generated/routes";
 import { errorHandler } from "./middleware/errorHandler";
+import { startExpireStaleTasksJob } from "./jobs/expireStaleTasks";
 
 const app = express();
 
@@ -38,6 +39,7 @@ const apiLimiter = rateLimit({
 });
 app.use("/agents", apiLimiter);
 app.use("/tasks", apiLimiter);
+app.use("/api-keys", apiLimiter);
 
 // Health check
 app.get("/health", (_req, res) => {
@@ -74,6 +76,7 @@ if (process.env.NODE_ENV !== "test") {
   │                                         │
   └─────────────────────────────────────────┘
     `);
+    startExpireStaleTasksJob();
   });
 }
 

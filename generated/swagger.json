@@ -226,6 +226,78 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ApiKeyInfo": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"keyPrefix": {
+						"type": "string"
+					},
+					"label": {
+						"type": "string",
+						"nullable": true
+					},
+					"agentId": {
+						"type": "string",
+						"nullable": true
+					},
+					"scopes": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"lastUsedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"expiresAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"revoked": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"keyPrefix",
+					"label",
+					"agentId",
+					"scopes",
+					"lastUsedAt",
+					"expiresAt",
+					"revoked",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateApiKeyBody": {
+				"properties": {
+					"label": {
+						"type": "string"
+					},
+					"agentId": {
+						"type": "string"
+					},
+					"scopes": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"PricingModel": {
 				"type": "string",
 				"enum": [
@@ -1078,6 +1150,145 @@
 						}
 					}
 				}
+			}
+		},
+		"/api-keys": {
+			"get": {
+				"operationId": "ListKeys",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"keys": {
+											"items": {
+												"$ref": "#/components/schemas/ApiKeyInfo"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"keys"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "List all API keys for the authenticated owner.\nKey hashes are never returned — only prefixes and metadata.",
+				"tags": [
+					"API Keys"
+				],
+				"security": [
+					{
+						"api_key": [
+							"read"
+						]
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateKey",
+				"responses": {
+					"201": {
+						"description": "API key created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"key": {
+											"type": "string"
+										},
+										"keyInfo": {
+											"$ref": "#/components/schemas/ApiKeyInfo"
+										}
+									},
+									"required": [
+										"key",
+										"keyInfo"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new API key.\nReturns the full key ONCE — store it securely, it cannot be retrieved again.",
+				"tags": [
+					"API Keys"
+				],
+				"security": [
+					{
+						"api_key": [
+							"write"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateApiKeyBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api-keys/{keyId}": {
+			"delete": {
+				"operationId": "RevokeKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										},
+										"key": {
+											"$ref": "#/components/schemas/ApiKeyInfo"
+										}
+									},
+									"required": [
+										"message",
+										"key"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Revoke an API key. The key will immediately stop working.",
+				"tags": [
+					"API Keys"
+				],
+				"security": [
+					{
+						"api_key": [
+							"write"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "keyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/agents": {
