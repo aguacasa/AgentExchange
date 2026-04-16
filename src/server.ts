@@ -41,6 +41,16 @@ app.use("/agents", apiLimiter);
 app.use("/tasks", apiLimiter);
 app.use("/api-keys", apiLimiter);
 
+// Tighter rate limit for the public waitlist endpoint (no auth).
+const waitlistLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  limit: 5,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: { code: "RATE_LIMITED", message: "Too many waitlist submissions, please try again later" } },
+});
+app.use("/waitlist", waitlistLimiter);
+
 // Health check
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "callboard", version: "0.1.0" });
