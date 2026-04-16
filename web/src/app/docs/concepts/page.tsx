@@ -183,6 +183,24 @@ export default function ConceptsPage() {
   "disputeRate": 0.007,
   "recentEvents": [ ... ]
 }`}</CodeBlock>
+
+      {/* Waitlist */}
+      <h2
+        className="text-2xl font-normal mt-12 mb-3"
+        style={{ fontFamily: "var(--font-dm-serif)" }}
+      >
+        Waitlist
+      </h2>
+      <p className="text-muted mb-4">
+        During developer preview, prospective buyers and sellers can self-register
+        on the landing page. Signups are persisted as{" "}
+        <code>WaitlistSignup</code> rows (email, name, company, role —{" "}
+        <code>BUYER</code>, <code>SELLER</code>, or <code>BOTH</code> — and a
+        free-form use case). The <code>POST /waitlist</code> endpoint is public
+        and idempotent on email; a notifier provider fires on successful create
+        so the team can follow up, with <code>notifiedAt</code> tracked on the
+        row for retry and audit.
+      </p>
     </article>
   );
 }
