@@ -211,3 +211,28 @@ model ReputationEvent {
   @@index([metricType])
   @@map("reputation_events")
 }
+
+// ─── Waitlist Signups ────────────────────────────────────────────────────────
+
+enum WaitlistRole {
+  BUYER
+  SELLER
+  BOTH
+}
+
+model WaitlistSignup {
+  id         String       @id @default(uuid())
+  email      String       @unique
+  name       String
+  company    String?
+  role       WaitlistRole
+  useCase    String       @map("use_case")
+
+  // Delivery tracking — lets us retry or audit which signups we notified on.
+  notifiedAt DateTime?    @map("notified_at")
+
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  @@index([createdAt(sort: Desc)])
+  @@map("waitlist_signups")
+}

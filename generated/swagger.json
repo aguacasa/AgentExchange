@@ -7,6 +7,60 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"WaitlistSignupResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"email",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"WaitlistSignupBody": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"company": {
+						"type": "string"
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"BUYER",
+							"SELLER",
+							"BOTH"
+						],
+						"description": "What the signup is planning to use Callboard for."
+					},
+					"useCase": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"name",
+					"role",
+					"useCase"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"TaskStatus": {
 				"type": "string",
 				"enum": [
@@ -741,6 +795,39 @@
 		"contact": {}
 	},
 	"paths": {
+		"/waitlist": {
+			"post": {
+				"operationId": "Join",
+				"responses": {
+					"201": {
+						"description": "Waitlist signup created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WaitlistSignupResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Join the Callboard waitlist. Public endpoint — no auth required.\nPersists the signup and triggers a notification to the team.",
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/WaitlistSignupBody"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/tasks": {
 			"post": {
 				"operationId": "CreateTask",

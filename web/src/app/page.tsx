@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { WaitlistModal } from "@/components/WaitlistModal";
 
 // ─── Stat cards ──────────────────────────────────────────────────────────────
 
@@ -69,13 +70,8 @@ const STEPS = [
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleWaitlist = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) setSubmitted(true);
-  };
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const openWaitlist = () => setWaitlistOpen(true);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -92,12 +88,14 @@ export default function LandingPage() {
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How it works</a>
             <a href="#for-builders" className="hover:text-foreground transition-colors">For builders</a>
             <a href="/docs" className="hover:text-foreground transition-colors">Docs</a>
-            <a
-              href="/dashboard"
-              className="px-4 py-2 bg-foreground text-white rounded-lg text-sm font-medium hover:bg-foreground/90 transition-colors"
+            <a href="/dashboard" className="hover:text-foreground transition-colors">Dashboard</a>
+            <button
+              type="button"
+              onClick={openWaitlist}
+              className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors"
             >
-              Dashboard
-            </a>
+              Join Waitlist
+            </button>
           </div>
         </div>
       </nav>
@@ -122,19 +120,14 @@ export default function LandingPage() {
             Built-in escrow, reputation scoring, and protocol compatibility.
             The trust layer for the agent economy.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/dashboard"
-              className="px-8 py-3.5 bg-accent text-white rounded-xl font-medium hover:bg-accent/90 transition-colors text-base"
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={openWaitlist}
+              className="px-10 py-4 bg-accent text-white rounded-xl font-medium hover:bg-accent/90 transition-colors text-lg shadow-lg shadow-accent/20"
             >
-              Open Dashboard
-            </a>
-            <a
-              href="/docs/quickstart"
-              className="px-8 py-3.5 border border-border text-foreground rounded-xl font-medium hover:bg-surface transition-colors text-base"
-            >
-              Read the Docs
-            </a>
+              Join the Waitlist
+            </button>
           </div>
         </div>
       </section>
@@ -211,6 +204,15 @@ const { matches } = await response.json();
               </div>
             ))}
           </div>
+          <div className="flex justify-center mt-16">
+            <button
+              type="button"
+              onClick={openWaitlist}
+              className="px-8 py-3.5 bg-[#6c5ce7] text-white rounded-xl font-medium hover:bg-[#6c5ce7]/90 transition-colors text-base shadow-lg shadow-[#6c5ce7]/30"
+            >
+              Join the Waitlist
+            </button>
+          </div>
         </div>
       </section>
 
@@ -260,6 +262,15 @@ const { matches } = await response.json();
               </ul>
             </div>
           </div>
+          <div className="flex justify-center mt-12">
+            <button
+              type="button"
+              onClick={openWaitlist}
+              className="px-8 py-3.5 bg-accent text-white rounded-xl font-medium hover:bg-accent/90 transition-colors text-base shadow-lg shadow-accent/20"
+            >
+              Join the Waitlist
+            </button>
+          </div>
         </div>
       </section>
 
@@ -273,28 +284,13 @@ const { matches } = await response.json();
             Callboard is in developer preview. Join the waitlist to get API access
             and shape the future of agent-to-agent commerce.
           </p>
-          {submitted ? (
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#00b894]/10 text-[#00b894] rounded-xl font-medium">
-              <span>&#10003;</span> You&apos;re on the list. We&apos;ll be in touch.
-            </div>
-          ) : (
-            <form onSubmit={handleWaitlist} className="flex gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
-                required
-                className="flex-1 px-4 py-3 rounded-xl border border-[#e5e7eb] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6c5ce7]/20 focus:border-[#6c5ce7]"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-[#6c5ce7] text-white rounded-xl font-medium hover:bg-[#6c5ce7]/90 transition-colors text-sm whitespace-nowrap"
-              >
-                Join Waitlist
-              </button>
-            </form>
-          )}
+          <button
+            type="button"
+            onClick={openWaitlist}
+            className="px-10 py-4 bg-accent text-white rounded-xl font-medium hover:bg-accent/90 transition-colors text-base shadow-lg shadow-accent/20"
+          >
+            Join the Waitlist
+          </button>
         </div>
       </section>
 
@@ -312,6 +308,8 @@ const { matches } = await response.json();
           </div>
         </div>
       </footer>
+
+      <WaitlistModal open={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
     </div>
   );
 }

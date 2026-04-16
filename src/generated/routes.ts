@@ -4,6 +4,8 @@
 import type { TsoaRoute } from '@tsoa/runtime';
 import {  fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { WaitlistController } from './../controllers/waitlist.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { TaskController } from './../controllers/task.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ApiKeyController } from './../controllers/apikey.controller';
@@ -19,6 +21,28 @@ const expressAuthenticationRecasted = expressAuthentication as (req: ExRequest, 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+    "WaitlistSignupResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "email": {"dataType":"string","required":true},
+            "createdAt": {"dataType":"datetime","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "WaitlistSignupBody": {
+        "dataType": "refObject",
+        "properties": {
+            "email": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "company": {"dataType":"string"},
+            "role": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["BUYER"]},{"dataType":"enum","enums":["SELLER"]},{"dataType":"enum","enums":["BOTH"]}],"required":true},
+            "useCase": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "TaskStatus": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["OPEN"]},{"dataType":"enum","enums":["ACCEPTED"]},{"dataType":"enum","enums":["IN_PROGRESS"]},{"dataType":"enum","enums":["SUBMITTED"]},{"dataType":"enum","enums":["VERIFYING"]},{"dataType":"enum","enums":["COMPLETED"]},{"dataType":"enum","enums":["FAILED"]},{"dataType":"enum","enums":["DISPUTED"]},{"dataType":"enum","enums":["CANCELLED"]},{"dataType":"enum","enums":["EXPIRED"]}],"validators":{}},
@@ -308,6 +332,36 @@ export function RegisterRoutes(app: Router) {
 
 
     
+        const argsWaitlistController_join: Record<string, TsoaRoute.ParameterSchema> = {
+                body: {"in":"body","name":"body","required":true,"ref":"WaitlistSignupBody"},
+        };
+        app.post('/waitlist',
+            ...(fetchMiddlewares<RequestHandler>(WaitlistController)),
+            ...(fetchMiddlewares<RequestHandler>(WaitlistController.prototype.join)),
+
+            async function WaitlistController_join(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsWaitlistController_join, request, response });
+
+                const controller = new WaitlistController();
+
+              await templateService.apiHandler({
+                methodName: 'join',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsTaskController_createTask: Record<string, TsoaRoute.ParameterSchema> = {
                 body: {"in":"body","name":"body","required":true,"ref":"CreateTaskBody"},
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},

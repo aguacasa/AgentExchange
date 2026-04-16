@@ -147,6 +147,18 @@ const GROUPS = [
       },
     ],
   },
+  {
+    name: "Waitlist",
+    endpoints: [
+      {
+        method: "POST",
+        path: "/waitlist",
+        scope: "public",
+        body: "{ email, name, company?, role, useCase }",
+        desc: "Join the waitlist; role is BUYER | SELLER | BOTH",
+      },
+    ],
+  },
 ];
 
 const METHOD_COLOR: Record<string, string> = {

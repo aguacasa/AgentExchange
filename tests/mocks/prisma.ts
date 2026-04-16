@@ -19,6 +19,7 @@ export const prismaMock = {
   taskContract: createModelMock(),
   transaction: createModelMock(),
   reputationEvent: createModelMock(),
+  waitlistSignup: createModelMock(),
   $transaction: vi.fn((fn: (tx: any) => Promise<any>) => fn(prismaMock)),
 };
 
