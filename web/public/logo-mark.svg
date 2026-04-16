@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Rounded square — corkboard -->
+  <rect width="32" height="32" rx="7" fill="#D4A574"/>
+
+  <!-- Subtle texture dots -->
+  <circle cx="5" cy="5.5" r="0.6" fill="#C4956A" opacity="0.5"/>
+  <circle cx="27" cy="7" r="0.5" fill="#C4956A" opacity="0.4"/>
+  <circle cx="6" cy="26" r="0.5" fill="#C4956A" opacity="0.45"/>
+  <circle cx="26" cy="25" r="0.6" fill="#C4956A" opacity="0.4"/>
+  <circle cx="15" cy="5" r="0.4" fill="#C4956A" opacity="0.35"/>
+  <circle cx="25" cy="16" r="0.5" fill="#C4956A" opacity="0.3"/>
+
+  <!-- Letter C -->
+  <path d="M19.8 10.2c-1.1-.6-2.5-1-4.1-1-5 0-8.2 3.6-8.2 8.4s3.2 8.4 8.2 8.4c1.6 0 3-.4 4.1-1" stroke="white" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+
+  <!-- Pin top-right (red) -->
+  <circle cx="25.5" cy="6.5" r="2.2" fill="#E17055"/>
+  <circle cx="25.5" cy="6.5" r="0.9" fill="#C0392B"/>
+
+  <!-- Pin bottom-left (accent) -->
+  <circle cx="6.5" cy="25.5" r="2.2" fill="#6C5CE7"/>
+  <circle cx="6.5" cy="25.5" r="0.9" fill="#4834D4"/>
+</svg>

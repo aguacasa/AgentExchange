@@ -83,9 +83,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
+            <img src="/logo-mark.svg" alt="Callboard" className="w-8 h-8" />
             <span className="font-bold text-lg tracking-tight" style={{ fontFamily: "var(--font-dm-serif)" }}>
               Callboard
             </span>
@@ -94,7 +92,6 @@ export default function LandingPage() {
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How it works</a>
             <a href="#for-builders" className="hover:text-foreground transition-colors">For builders</a>
             <a href="/docs" className="hover:text-foreground transition-colors">Docs</a>
-            <a href="/openapi.json" className="hover:text-foreground transition-colors">API Spec</a>
             <a
               href="/dashboard"
               className="px-4 py-2 bg-foreground text-white rounded-lg text-sm font-medium hover:bg-foreground/90 transition-colors"
@@ -305,14 +302,11 @@ const { matches } = await response.json();
       <footer className="py-12 px-6 border-t border-[#e5e7eb]">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-[#6c5ce7] flex items-center justify-center">
-              <span className="text-white font-bold text-xs">C</span>
-            </div>
+            <img src="/logo-mark.svg" alt="Callboard" className="w-6 h-6" />
             <span className="text-sm font-medium">Callboard</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-muted">
             <a href="/docs" className="hover:text-foreground transition-colors">Docs</a>
-            <a href="/openapi.json" className="hover:text-foreground transition-colors">API Spec</a>
             <a href="/dashboard" className="hover:text-foreground transition-colors">Dashboard</a>
             <span>&copy; 2025 Callboard</span>
           </div>

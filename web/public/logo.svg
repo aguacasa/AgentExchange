@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Rounded square background — corkboard tan -->
+  <rect width="512" height="512" rx="96" fill="#D4A574"/>
+
+  <!-- Subtle corkboard texture: small speckles -->
+  <circle cx="80" cy="90" r="3" fill="#C4956A" opacity="0.5"/>
+  <circle cx="200" cy="60" r="2.5" fill="#C4956A" opacity="0.4"/>
+  <circle cx="350" cy="80" r="3.5" fill="#C4956A" opacity="0.45"/>
+  <circle cx="440" cy="120" r="2" fill="#C4956A" opacity="0.5"/>
+  <circle cx="100" cy="200" r="3" fill="#C4956A" opacity="0.35"/>
+  <circle cx="420" cy="250" r="2.5" fill="#C4956A" opacity="0.4"/>
+  <circle cx="70" cy="350" r="2" fill="#C4956A" opacity="0.5"/>
+  <circle cx="150" cy="420" r="3" fill="#C4956A" opacity="0.4"/>
+  <circle cx="300" cy="440" r="2.5" fill="#C4956A" opacity="0.45"/>
+  <circle cx="430" cy="400" r="3" fill="#C4956A" opacity="0.35"/>
+  <circle cx="250" cy="150" r="2" fill="#C4956A" opacity="0.3"/>
+  <circle cx="380" cy="350" r="2.5" fill="#C4956A" opacity="0.4"/>
+  <circle cx="130" cy="300" r="2" fill="#E0B68A" opacity="0.3"/>
+  <circle cx="350" cy="200" r="3" fill="#E0B68A" opacity="0.25"/>
+  <circle cx="450" cy="50" r="2" fill="#C4956A" opacity="0.4"/>
+  <circle cx="60" cy="460" r="2.5" fill="#C4956A" opacity="0.35"/>
+
+  <!-- Letter C — bold, white, slightly playful with rounded terminals -->
+  <path d="M310 148c-15.5-8.5-35-14-58-14-72 0-118 52-118 122s46 122 118 122c23 0 42.5-5.5 58-14" stroke="white" stroke-width="52" stroke-linecap="round" fill="none"/>
+
+  <!-- Pin 1 — top-right area (red) -->
+  <circle cx="390" cy="110" r="18" fill="#E17055"/>
+  <circle cx="390" cy="110" r="7" fill="#C0392B"/>
+  <circle cx="385" cy="105" r="3" fill="#E8867A" opacity="0.7"/>
+
+  <!-- Pin 2 — bottom-left area (blue/accent) -->
+  <circle cx="120" cy="400" r="18" fill="#6C5CE7"/>
+  <circle cx="120" cy="400" r="7" fill="#4834D4"/>
+  <circle cx="115" cy="395" r="3" fill="#A29BFE" opacity="0.7"/>
+
+  <!-- Pin 3 — top-left (green) -->
+  <circle cx="110" cy="115" r="14" fill="#00B894"/>
+  <circle cx="110" cy="115" r="5.5" fill="#00856A"/>
+  <circle cx="106" cy="111" r="2.5" fill="#55E6C1" opacity="0.6"/>
+
+  <!-- Pin 4 — bottom-right (yellow/warning) -->
+  <circle cx="400" cy="395" r="14" fill="#FDCB6E"/>
+  <circle cx="400" cy="395" r="5.5" fill="#E0A800"/>
+  <circle cx="396" cy="391" r="2.5" fill="#FFEAA7" opacity="0.7"/>
+</svg>

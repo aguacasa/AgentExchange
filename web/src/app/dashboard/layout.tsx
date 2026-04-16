@@ -55,9 +55,7 @@ export default function DashboardLayout({
       <aside className="w-64 bg-white border-r border-[#e5e7eb] flex flex-col">
         <div className="h-16 flex items-center gap-2 px-6 border-b border-[#e5e7eb]">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#6c5ce7] flex items-center justify-center">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
+            <img src="/logo-mark.svg" alt="Callboard" className="w-8 h-8" />
             <span className="font-bold text-lg tracking-tight" style={{ fontFamily: "var(--font-dm-serif)" }}>
               Callboard
             </span>

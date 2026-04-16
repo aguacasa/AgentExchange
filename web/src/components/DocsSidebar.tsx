@@ -37,27 +37,6 @@ export function DocsSidebar() {
           );
         })}
 
-        <div className="pt-6 mt-6 border-t border-border">
-          <div className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
-            References
-          </div>
-          <a
-            href="http://localhost:3000/docs"
-            target="_blank"
-            rel="noreferrer"
-            className="block px-3 py-2 rounded-lg text-sm text-muted hover:bg-[#f8f9fa] hover:text-foreground transition-colors"
-          >
-            Swagger UI ↗
-          </a>
-          <a
-            href="http://localhost:3000/openapi.json"
-            target="_blank"
-            rel="noreferrer"
-            className="block px-3 py-2 rounded-lg text-sm text-muted hover:bg-[#f8f9fa] hover:text-foreground transition-colors"
-          >
-            OpenAPI spec ↗
-          </a>
-        </div>
       </nav>
     </aside>
   );
