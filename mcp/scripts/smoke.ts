@@ -13,9 +13,9 @@
  */
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { TOOL_NAMES } from "../src/tools.js";
 
 const BASE = process.env.CALLBOARD_BASE_URL ?? "http://localhost:3000";
 
@@ -68,24 +68,23 @@ function parseText<T>(r: McpTextResult): T {
 async function main(): Promise<void> {
   const cap = `mcp-smoke-${process.pid}-${Math.floor(Math.random() * 1e6)}`;
 
-  // 1. Bootstrap a seller via the REST API so there's something to hire.
-  step("Pre-flight: bootstrap a seller on the live API");
-  const seller = await postAgent({
-    name: `MCP-Smoke-Seller-${process.pid}`,
-    endpointUrl: "https://mcp-smoke.example.com/seller",
-    capabilities: [cap],
-    pricingModel: "PER_TASK",
-    pricePerUnit: 100,
-  });
+  step("Pre-flight: bootstrap a seller + buyer on the live API");
+  const [seller, buyer] = await Promise.all([
+    postAgent({
+      name: `MCP-Smoke-Seller-${process.pid}`,
+      endpointUrl: "https://mcp-smoke.example.com/seller",
+      capabilities: [cap],
+      pricingModel: "PER_TASK",
+      pricePerUnit: 100,
+    }),
+    postAgent({
+      name: `MCP-Smoke-Buyer-${process.pid}`,
+      endpointUrl: "https://mcp-smoke.example.com/buyer",
+      capabilities: ["mcp-smoke-buyer"],
+    }),
+  ]);
   console.log(`  seller.id = ${seller.agent.id}`);
-
-  // 2. Bootstrap a buyer whose key the MCP server will use.
-  const buyer = await postAgent({
-    name: `MCP-Smoke-Buyer-${process.pid}`,
-    endpointUrl: "https://mcp-smoke.example.com/buyer",
-    capabilities: ["mcp-smoke-buyer"],
-  });
-  console.log(`  buyer.id = ${buyer.agent.id}`);
+  console.log(`  buyer.id  = ${buyer.agent.id}`);
 
   // 3. Spawn the MCP server as a subprocess.
   step("Spawning @callboard/mcp via stdio");
@@ -106,22 +105,12 @@ async function main(): Promise<void> {
   await client.connect(transport);
   ok("client connected", true);
 
-  // 4. list_tools — every tool we built should be advertised.
   step("list_tools");
   const { tools } = await client.listTools();
   const names = tools.map((t) => t.name).sort();
-  const expected = [
-    "dispute_task",
-    "find_agents",
-    "get_agent_card",
-    "list_my_tasks",
-    "post_task",
-    "rank_agents",
-    "verify_task",
-    "wait_for_submission",
-  ];
+  const expected = [...TOOL_NAMES].sort();
   ok(
-    `exposes all 8 tools`,
+    `exposes all ${expected.length} tools`,
     JSON.stringify(names) === JSON.stringify(expected),
     `got: ${names.join(",")}`
   );

@@ -1,13 +1,10 @@
 import type { Config } from "./config.js";
 
-export interface CallboardError {
-  status: number;
-  code: string;
-  message: string;
-}
-
-function isCallboardError(x: unknown): x is CallboardError {
-  return typeof x === "object" && x !== null && "status" in x && "code" in x;
+export class CallboardError extends Error {
+  constructor(public status: number, public code: string, message: string) {
+    super(message);
+    this.name = "CallboardError";
+  }
 }
 
 export class CallboardClient {
@@ -28,17 +25,18 @@ export class CallboardClient {
       body: body === undefined ? undefined : JSON.stringify(body),
     });
 
+    // Empty bodies (e.g. 204) would make res.json() throw; round-trip through text first.
     const text = await res.text();
-    const data = text ? (JSON.parse(text) as Record<string, unknown>) : ({} as Record<string, unknown>);
+    const data: { error?: { code?: string; message?: string } } & Record<string, unknown> = text
+      ? JSON.parse(text)
+      : {};
 
     if (!res.ok) {
-      const err = (data as { error?: { code?: string; message?: string } }).error ?? {};
-      const error: CallboardError = {
-        status: res.status,
-        code: err.code ?? "UNKNOWN",
-        message: err.message ?? res.statusText,
-      };
-      throw error;
+      throw new CallboardError(
+        res.status,
+        data.error?.code ?? "UNKNOWN",
+        data.error?.message ?? res.statusText
+      );
     }
 
     return data as T;
@@ -49,9 +47,17 @@ export class CallboardClient {
 }
 
 export function formatError(e: unknown): string {
-  if (isCallboardError(e)) {
-    return `Callboard ${e.status} ${e.code}: ${e.message}`;
-  }
+  if (e instanceof CallboardError) return `Callboard ${e.status} ${e.code}: ${e.message}`;
   if (e instanceof Error) return e.message;
   return String(e);
+}
+
+/** Build a URLSearchParams from a record, skipping undefined values. */
+export function query(params: Record<string, string | number | undefined>): string {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined) qs.set(k, String(v));
+  }
+  const s = qs.toString();
+  return s ? `?${s}` : "";
 }

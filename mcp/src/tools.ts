@@ -1,6 +1,23 @@
-import { z } from "zod";
+import { z, type ZodRawShape } from "zod";
 import type { CallboardClient } from "./callboard.js";
+import { query } from "./callboard.js";
 import type { Config } from "./config.js";
+
+// ─── Tool type ─────────────────────────────────────────────────────────────
+// Each tool colocates its name, description, zod schema, and handler.
+// The handler's `args` type is inferred from the schema — no casts, no
+// Record<string, unknown>.
+
+export interface ToolDef<S extends ZodRawShape> {
+  name: string;
+  description: string;
+  inputSchema: S;
+  handler: (args: z.infer<z.ZodObject<S>>) => Promise<unknown>;
+}
+
+function tool<S extends ZodRawShape>(def: ToolDef<S>): ToolDef<S> {
+  return def;
+}
 
 interface Task {
   id: string;
@@ -10,23 +27,35 @@ interface Task {
   verificationResult?: unknown;
 }
 
-interface AgentCard {
-  id: string;
-  name: string;
-  description?: string;
-  capabilities: { name: string }[];
-  pricing: { model: string; pricePerUnit: number; currency: string };
-  reputation: { score: number; totalTasks: number; successRate: number };
-}
+const TASK_STATUSES = [
+  "OPEN",
+  "ACCEPTED",
+  "IN_PROGRESS",
+  "SUBMITTED",
+  "VERIFYING",
+  "COMPLETED",
+  "FAILED",
+  "DISPUTED",
+  "CANCELLED",
+  "EXPIRED",
+] as const;
 
-// ─── Tool factory ───────────────────────────────────────────────────────────
-// Each tool is (name, description, zod-schema, handler). Tools return a
-// JSON-stringified payload as MCP text content; errors surface via thrown
-// CallboardError which the server layer maps to { isError: true }.
+const TERMINAL_STATUSES = new Set<string>([
+  "SUBMITTED",
+  "COMPLETED",
+  "FAILED",
+  "DISPUTED",
+  "EXPIRED",
+  "CANCELLED",
+]);
+
+const taskStatus = z.enum(TASK_STATUSES);
+
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 export function buildTools(client: CallboardClient, config: Config) {
   return [
-    {
+    tool({
       name: "find_agents",
       description:
         "Search the Callboard registry for agents by capability. Use this before posting a task " +
@@ -37,21 +66,18 @@ export function buildTools(client: CallboardClient, config: Config) {
         minReputation: z.number().min(0).max(100).optional().describe("Minimum 0-100 reputation score"),
         limit: z.number().int().positive().max(50).optional().describe("Max results (default 10)"),
       },
-      handler: async (args: {
-        capability: string;
-        maxPrice?: number;
-        minReputation?: number;
-        limit?: number;
-      }) => {
-        const qs = new URLSearchParams({ capability: args.capability });
-        if (args.maxPrice !== undefined) qs.set("maxPrice", String(args.maxPrice));
-        if (args.minReputation !== undefined) qs.set("minReputation", String(args.minReputation));
-        if (args.limit !== undefined) qs.set("limit", String(args.limit));
-        return client.get(`/agents?${qs.toString()}`);
-      },
-    },
+      handler: async (args) =>
+        client.get(
+          `/agents${query({
+            capability: args.capability,
+            maxPrice: args.maxPrice,
+            minReputation: args.minReputation,
+            limit: args.limit,
+          })}`
+        ),
+    }),
 
-    {
+    tool({
       name: "rank_agents",
       description:
         "Rank agents for a capability by the Callboard matching score (capability fit + reputation + " +
@@ -63,19 +89,19 @@ export function buildTools(client: CallboardClient, config: Config) {
         maxResponseMs: z.number().int().positive().optional(),
         limit: z.number().int().positive().max(20).optional(),
       },
-      handler: async (args: Record<string, unknown>) => client.post("/agents/match", args),
-    },
+      handler: async (args) => client.post("/agents/match", args),
+    }),
 
-    {
+    tool({
       name: "get_agent_card",
       description:
         "Fetch a single agent's Agent Card (A2A-compatible). Use to inspect pricing, sample " +
         "input/output, and SLA before transacting.",
       inputSchema: { agentId: z.string() },
-      handler: async (args: { agentId: string }) => client.get(`/agents/${args.agentId}`),
-    },
+      handler: async (args) => client.get(`/agents/${args.agentId}`),
+    }),
 
-    {
+    tool({
       name: "post_task",
       description:
         "Post a new task contract. Funds are held in escrow the moment this returns. " +
@@ -102,16 +128,16 @@ export function buildTools(client: CallboardClient, config: Config) {
           .optional()
           .describe("Override the configured buyer agent ID. Rare."),
       },
-      handler: async (args: Record<string, unknown>) => {
+      handler: async (args) => {
         const { buyerAgentIdOverride, ...rest } = args;
         return client.post("/tasks", {
           buyerAgentId: buyerAgentIdOverride ?? config.buyerAgentId,
           ...rest,
         });
       },
-    },
+    }),
 
-    {
+    tool({
       name: "wait_for_submission",
       description:
         "Poll a task until a seller submits work (status=SUBMITTED) or the timeout elapses. " +
@@ -127,22 +153,23 @@ export function buildTools(client: CallboardClient, config: Config) {
           .optional()
           .describe("Max wait in ms (default 60000, max 300000)"),
       },
-      handler: async (args: { taskId: string; waitMs?: number }) => {
+      handler: async (args) => {
         const deadline = Date.now() + (args.waitMs ?? config.defaultWaitMs);
-        const terminal = new Set(["SUBMITTED", "COMPLETED", "FAILED", "DISPUTED", "EXPIRED", "CANCELLED"]);
         let task: Task | null = null;
         let pollMs = 1_000;
-        while (Date.now() < deadline) {
+        while (true) {
           task = await client.get<Task>(`/tasks/${args.taskId}`);
-          if (terminal.has(task.status)) return task;
-          await sleep(Math.min(pollMs, deadline - Date.now()));
+          if (TERMINAL_STATUSES.has(task.status)) return task;
+          const remaining = deadline - Date.now();
+          if (remaining <= 0) break;
+          await sleep(Math.min(pollMs, remaining));
           pollMs = Math.min(pollMs * 1.5, 5_000);
         }
         return { timedOut: true, lastStatus: task?.status ?? "unknown", taskId: args.taskId };
       },
-    },
+    }),
 
-    {
+    tool({
       name: "verify_task",
       description:
         "Verify the submitted output. passed=true releases escrow to the seller and bumps " +
@@ -156,13 +183,13 @@ export function buildTools(client: CallboardClient, config: Config) {
           .optional()
           .describe("Optional notes, e.g. { qualityScore: 90, reason: '...' }"),
       },
-      handler: async (args: Record<string, unknown>) => {
-        const { taskId, ...body } = args as { taskId: string; [k: string]: unknown };
+      handler: async (args) => {
+        const { taskId, ...body } = args;
         return client.post(`/tasks/${taskId}/verify`, body);
       },
-    },
+    }),
 
-    {
+    tool({
       name: "dispute_task",
       description:
         "Raise a dispute on a task that's IN_PROGRESS or SUBMITTED. Freezes escrow until a " +
@@ -171,45 +198,32 @@ export function buildTools(client: CallboardClient, config: Config) {
         taskId: z.string(),
         reason: z.string().min(1),
       },
-      handler: async (args: { taskId: string; reason: string }) =>
+      handler: async (args) =>
         client.post(`/tasks/${args.taskId}/dispute`, { reason: args.reason }),
-    },
+    }),
 
-    {
+    tool({
       name: "list_my_tasks",
       description:
         "List the caller's tasks (scoped to the configured buyer agent's owner). Useful for 'what " +
         "jobs do I have running?' or finding a task ID the user referenced.",
       inputSchema: {
-        status: z
-          .enum([
-            "OPEN",
-            "ACCEPTED",
-            "IN_PROGRESS",
-            "SUBMITTED",
-            "VERIFYING",
-            "COMPLETED",
-            "FAILED",
-            "DISPUTED",
-            "CANCELLED",
-            "EXPIRED",
-          ])
-          .optional(),
+        status: taskStatus.optional(),
         limit: z.number().int().positive().max(100).optional(),
       },
-      handler: async (args: { status?: string; limit?: number }) => {
-        const qs = new URLSearchParams();
-        if (args.status) qs.set("status", args.status);
-        if (args.limit !== undefined) qs.set("limit", String(args.limit));
-        const suffix = qs.toString();
-        return client.get(`/tasks${suffix ? "?" + suffix : ""}`);
-      },
-    },
-  ] as const;
+      handler: async (args) =>
+        client.get(`/tasks${query({ status: args.status, limit: args.limit })}`),
+    }),
+  ];
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
-export type { AgentCard, Task };
+export const TOOL_NAMES = [
+  "find_agents",
+  "rank_agents",
+  "get_agent_card",
+  "post_task",
+  "wait_for_submission",
+  "verify_task",
+  "dispute_task",
+  "list_my_tasks",
+] as const;

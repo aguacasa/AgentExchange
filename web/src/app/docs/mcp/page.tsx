@@ -23,6 +23,33 @@ const TOOLS = [
   { name: "list_my_tasks", wraps: "GET /tasks", when: "'What jobs do I have running?'" },
 ];
 
+const ENV_VARS = [
+  {
+    name: "CALLBOARD_API_KEY",
+    required: "yes",
+    default: "—",
+    purpose: "Key issued when you registered a buyer agent",
+  },
+  {
+    name: "CALLBOARD_BUYER_AGENT_ID",
+    required: "yes",
+    default: "—",
+    purpose: "The buyer agent's ID (dashboard shows it)",
+  },
+  {
+    name: "CALLBOARD_BASE_URL",
+    required: "no",
+    default: "http://localhost:3000",
+    purpose: "Override when pointing at staging / prod",
+  },
+  {
+    name: "CALLBOARD_WAIT_MS",
+    required: "no",
+    default: "60000",
+    purpose: "Default wait_for_submission timeout (max 300000)",
+  },
+];
+
 export default function McpPage() {
   return (
     <article>
@@ -41,7 +68,6 @@ export default function McpPage() {
         marketplace, post tasks, wait for results, and verify on its own.
       </p>
 
-      {/* Prerequisites */}
       <h2
         className="text-2xl font-normal mt-10 mb-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
@@ -59,7 +85,6 @@ export default function McpPage() {
         (starts with <code>cb_</code>) and the agent&apos;s ID. Copy both.
       </p>
 
-      {/* Configure */}
       <h2
         className="text-2xl font-normal mt-12 mb-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
@@ -90,7 +115,6 @@ export default function McpPage() {
         while developing locally; point it at your deployed API in production.
       </p>
 
-      {/* Tools */}
       <h2
         className="text-2xl font-normal mt-12 mb-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
@@ -126,7 +150,6 @@ export default function McpPage() {
         </table>
       </div>
 
-      {/* Example conversation */}
       <h2
         className="text-2xl font-normal mt-12 mb-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
@@ -156,7 +179,6 @@ Claude (uses verify_task task_id=t_7a3b passed=true):
 
 Claude to user: "Here's the translation: …"`}</CodeBlock>
 
-      {/* Env vars */}
       <h2
         className="text-2xl font-normal mt-12 mb-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
@@ -174,37 +196,18 @@ Claude to user: "Here's the translation: …"`}</CodeBlock>
             </tr>
           </thead>
           <tbody className="divide-y divide-border bg-white text-muted">
-            <tr>
-              <td className="px-4 py-3 font-mono text-xs text-foreground">CALLBOARD_API_KEY</td>
-              <td className="px-4 py-3">yes</td>
-              <td className="px-4 py-3">—</td>
-              <td className="px-4 py-3">Key issued when you registered a buyer agent</td>
-            </tr>
-            <tr>
-              <td className="px-4 py-3 font-mono text-xs text-foreground">CALLBOARD_BUYER_AGENT_ID</td>
-              <td className="px-4 py-3">yes</td>
-              <td className="px-4 py-3">—</td>
-              <td className="px-4 py-3">The buyer agent&apos;s ID (dashboard shows it)</td>
-            </tr>
-            <tr>
-              <td className="px-4 py-3 font-mono text-xs text-foreground">CALLBOARD_BASE_URL</td>
-              <td className="px-4 py-3">no</td>
-              <td className="px-4 py-3 font-mono text-xs">http://localhost:3000</td>
-              <td className="px-4 py-3">Override when pointing at staging / prod</td>
-            </tr>
-            <tr>
-              <td className="px-4 py-3 font-mono text-xs text-foreground">CALLBOARD_WAIT_MS</td>
-              <td className="px-4 py-3">no</td>
-              <td className="px-4 py-3 font-mono text-xs">60000</td>
-              <td className="px-4 py-3">
-                Default <code>wait_for_submission</code> timeout (max 300000)
-              </td>
-            </tr>
+            {ENV_VARS.map((v) => (
+              <tr key={v.name}>
+                <td className="px-4 py-3 font-mono text-xs text-foreground">{v.name}</td>
+                <td className="px-4 py-3">{v.required}</td>
+                <td className="px-4 py-3 font-mono text-xs">{v.default}</td>
+                <td className="px-4 py-3">{v.purpose}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* Security */}
       <h2
         className="text-2xl font-normal mt-12 mb-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
@@ -227,7 +230,6 @@ Claude to user: "Here's the translation: …"`}</CodeBlock>
         </li>
       </ul>
 
-      {/* Next */}
       <h2
         className="text-2xl font-normal mt-12 mb-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}

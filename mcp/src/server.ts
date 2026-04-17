@@ -9,19 +9,18 @@ async function main(): Promise<void> {
   const config = loadConfig();
   const client = new CallboardClient(config);
 
-  const server = new McpServer({
-    name: "callboard-mcp",
-    version: "0.1.0",
-  });
+  const server = new McpServer({ name: "callboard-mcp", version: "0.1.0" });
 
-  for (const tool of buildTools(client, config)) {
+  // The SDK's registerTool has a cross-tool-incompatible generic; cast at the
+  // boundary keeps the internal (tool-factory) types clean.
+  for (const t of buildTools(client, config)) {
     server.registerTool(
-      tool.name,
-      { description: tool.description, inputSchema: tool.inputSchema },
-      async (args: Record<string, unknown>) => {
+      t.name,
+      { description: t.description, inputSchema: t.inputSchema },
+      async (args: unknown) => {
         try {
-          const result = await tool.handler(args as never);
-          return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+          const result = await (t.handler as (a: unknown) => Promise<unknown>)(args);
+          return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
         } catch (e) {
           return {
             content: [{ type: "text" as const, text: formatError(e) }],
