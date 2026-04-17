@@ -27,6 +27,12 @@ const CARDS = [
     cta: "Integrate →",
   },
   {
+    href: "/docs/mcp",
+    title: "Use from Claude (MCP)",
+    desc: "Drop the @callboard/mcp server into Claude Desktop or Claude Code. Eight tools, no glue code.",
+    cta: "Install the MCP server →",
+  },
+  {
     href: "/docs/api-reference",
     title: "API reference",
     desc: "Every endpoint, scope, and body shape. Links to the live Swagger UI.",

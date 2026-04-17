@@ -8,6 +8,7 @@ This file is the authoritative briefing for any Claude session working on Callbo
 
 - **Backend** — Express 5 + TypeScript + tsoa + Prisma/Postgres at the repo root (`src/`, `prisma/`, `tests/`).
 - **Frontend** — Next.js 16 + React 19 App Router under `web/`.
+- **MCP server** — `@callboard/mcp`, a buyer-side [Model Context Protocol](https://modelcontextprotocol.io) server that exposes 8 tools to Claude Desktop / Claude Code / any MCP client. Lives at `mcp/`.
 - **Infra** — Docker Compose for Postgres 16 + Redis 7 in `docker-compose.yml`.
 
 For full detail see [README.md](README.md). For the user-facing docs site, see `web/src/app/docs/*` (served at `/docs` on the frontend).
@@ -16,7 +17,7 @@ For full detail see [README.md](README.md). For the user-facing docs site, see `
 
 | Purpose | Command |
 |---------|---------|
-| Install everything | `npm install && (cd web && npm install)` |
+| Install everything | `npm install && (cd web && npm install) && (cd mcp && npm install)` |
 | Boot Postgres + Redis | `docker compose up -d` |
 | Run migrations | `npm run db:migrate` |
 | Seed demo users/agents/tasks | `npm run db:seed` |
@@ -26,6 +27,9 @@ For full detail see [README.md](README.md). For the user-facing docs site, see `
 | All tests | `npm test` |
 | Watch tests | `npm run test:watch` |
 | Docs drift check | `bash scripts/check-docs-sync.sh` |
+| Live-API E2E smoke | `bash scripts/e2e.sh` (needs API running; 40 assertions) |
+| MCP build | `cd mcp && npm run build` |
+| MCP stdio smoke test | `cd mcp && npm run smoke` (needs API running; 14 assertions) |
 
 ## Documentation invariants
 
@@ -40,6 +44,8 @@ For full detail see [README.md](README.md). For the user-facing docs site, see `
 | `src/services/matching.service.ts` (weight change, signal added) | Update the weights table in `web/src/app/docs/concepts/page.tsx` |
 | `src/middleware/auth.ts` or `tsoa-auth.ts` (auth error codes or shapes) | Update the error-shapes table in `web/src/app/docs/build-an-agent/page.tsx` |
 | Capability tags used in seed data or elsewhere | Update the capability-tags section of `web/src/app/docs/build-an-agent/page.tsx` |
+| `mcp/src/tools.ts` (add, rename, or change an MCP tool) | Update the tools table in `web/src/app/docs/mcp/page.tsx` and `mcp/README.md` |
+| `mcp/src/config.ts` (new or renamed env var) | Update the env-vars table in `web/src/app/docs/mcp/page.tsx` and `mcp/README.md` |
 | Anything user-facing above that affects the onboarding flow | Update `web/src/app/docs/quickstart/page.tsx` |
 
 If you create a new doc page, add it to the `NAV` array in `web/src/components/DocsSidebar.tsx` **and** to the table in `README.md` under "Documentation".
@@ -79,3 +85,4 @@ Style tokens (reused across dashboard and docs):
 3. `bash scripts/check-docs-sync.sh` passes
 4. If you touched any path in the *Documentation invariants* table, the matching doc is updated in the same PR
 5. `cd web && npm run build` passes if you touched anything under `web/`
+6. `cd mcp && npm run build && npm run smoke` passes if you touched anything under `mcp/` (the smoke test needs the API running on `localhost:3000`)

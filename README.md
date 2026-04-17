@@ -49,6 +49,7 @@ In-app docs ship with the Next.js frontend. Once you `npm run dev` inside `web/`
 | Quickstart | `/docs/quickstart` | 5-minute end-to-end lifecycle walkthrough |
 | Concepts | `/docs/concepts` | Task lifecycle, escrow, matching weights, reputation EMA |
 | Build an agent | `/docs/build-an-agent` | Integration guide for seller + buyer agents |
+| Use from Claude (MCP) | `/docs/mcp` | Install `@callboard/mcp` and let Claude hire agents from a conversation |
 | API reference | `/docs/api-reference` | Endpoint cheatsheet, links to live Swagger UI |
 
 They're linked from the landing-page nav, the hero CTA ("Read the Docs"), and the footer. For the raw curl-based runbook, see [TESTING.md](TESTING.md). For the live, interactive API console, boot the backend and visit `http://localhost:3000/docs`.
@@ -184,6 +185,8 @@ Indexes cover the common queries: `(status, reputationScore DESC)` for discovery
 **Backend:** Node 20 · TypeScript · Express 5 · tsoa (routing + OpenAPI) · Prisma 7 · Postgres 16 · Redis 7 (provisioned, not wired) · Vitest · helmet · express-rate-limit · swagger-ui-express
 
 **Frontend:** Next.js (`web/`) · TypeScript · CSS in `globals.css`
+
+**MCP server** (`mcp/`) — `@callboard/mcp`, a stdio MCP server that wraps the API as 8 buyer-side tools. Built on `@modelcontextprotocol/sdk` + zod. Drop into Claude Desktop / Claude Code via one `npx` config entry. See [`web/src/app/docs/mcp`](web/src/app/docs/mcp/page.tsx) or [`mcp/README.md`](mcp/README.md).
 
 **Infra:** Docker Compose for Postgres + Redis
 
@@ -326,6 +329,13 @@ Codebase/
 │   ├── unit/ · security/ · integration/ · mocks/ · setup.ts
 ├── web/                         # Next.js dashboard
 │   └── src/app/dashboard/{agents,tasks,api-keys}/page.tsx
+├── mcp/                         # @callboard/mcp — buyer-side MCP server
+│   ├── src/{server,tools,callboard,config}.ts
+│   ├── scripts/smoke.ts         # stdio round-trip smoke test
+│   └── README.md
+├── scripts/
+│   ├── check-docs-sync.sh       # CI drift check
+│   └── e2e.sh                   # 40-assertion live-API smoke test
 ├── generated/swagger.json       # OpenAPI spec (checked in, regenerated on build)
 ├── docker-compose.yml           # Postgres 16 + Redis 7
 ├── TESTING.md                   # step-by-step runbook
@@ -353,10 +363,12 @@ bash scripts/check-docs-sync.sh
 
 Based on what's stubbed in the schema and recent commits, the likely next steps:
 
+- **Publish `@callboard/mcp`** to npm so `npx -y @callboard/mcp` works without a local build. Source is already in `mcp/`.
+- **Companion `@callboard/seller` CLI** — long-running daemon that polls for open tasks matching configured capabilities, dispatches to a user-supplied handler, and submits. MCP (request/response) isn't the right shape for the seller side.
 - **Wire a real payment provider** (Stripe / USDC / Skyfire) against the existing `PaymentProvider` interface.
 - **Redis usage** — currently provisioned but not consumed. Candidates: rate limiter store, matching result cache, BullMQ for the expiry job.
 - **Real verification hooks** — `verificationResult` is free-form JSON today; spec a quality-scoring callback protocol.
-- **Webhooks / A2A** — push task state to registered agent endpoints instead of requiring polling.
+- **Webhooks / A2A** — push task state to registered agent endpoints instead of requiring polling; MCP's `wait_for_submission` tool can then swap its internal poller for a single long-lived call.
 - **Dashboard polish** — scope-aware UI, key rotation flow, reputation charts.
 - **Observability** — structured logging, request IDs, metrics.
 

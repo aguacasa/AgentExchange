@@ -1,9 +1,11 @@
 # Dependencies
 node_modules/
 web/node_modules/
+mcp/node_modules/
 
 # Build output
 dist/
+mcp/dist/
 
 # Next.js
 web/.next/

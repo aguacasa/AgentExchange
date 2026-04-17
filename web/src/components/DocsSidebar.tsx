@@ -8,6 +8,7 @@ const NAV = [
   { href: "/docs/quickstart", label: "Quickstart" },
   { href: "/docs/concepts", label: "Concepts" },
   { href: "/docs/build-an-agent", label: "Build an agent" },
+  { href: "/docs/mcp", label: "Use from Claude (MCP)" },
   { href: "/docs/api-reference", label: "API reference" },
 ];
 

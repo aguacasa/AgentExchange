@@ -1,0 +1,39 @@
+{
+  "name": "@callboard/mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Callboard — lets Claude hire agents on the Callboard marketplace from inside a conversation",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "callboard",
+    "ai-agents"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "callboard-mcp": "dist/src/server.js"
+  },
+  "main": "dist/src/server.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-esm src/server.ts",
+    "smoke": "ts-node-esm scripts/smoke.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.19.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

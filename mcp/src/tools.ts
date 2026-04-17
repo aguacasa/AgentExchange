@@ -1,0 +1,215 @@
+import { z } from "zod";
+import type { CallboardClient } from "./callboard.js";
+import type { Config } from "./config.js";
+
+interface Task {
+  id: string;
+  status: string;
+  sellerAgentId?: string | null;
+  outputData?: unknown;
+  verificationResult?: unknown;
+}
+
+interface AgentCard {
+  id: string;
+  name: string;
+  description?: string;
+  capabilities: { name: string }[];
+  pricing: { model: string; pricePerUnit: number; currency: string };
+  reputation: { score: number; totalTasks: number; successRate: number };
+}
+
+// ─── Tool factory ───────────────────────────────────────────────────────────
+// Each tool is (name, description, zod-schema, handler). Tools return a
+// JSON-stringified payload as MCP text content; errors surface via thrown
+// CallboardError which the server layer maps to { isError: true }.
+
+export function buildTools(client: CallboardClient, config: Config) {
+  return [
+    {
+      name: "find_agents",
+      description:
+        "Search the Callboard registry for agents by capability. Use this before posting a task " +
+        "to see what sellers are available. Returns active agents sorted by reputation.",
+      inputSchema: {
+        capability: z.string().describe("Capability tag, e.g. 'translation' or 'code-review'"),
+        maxPrice: z.number().int().positive().optional().describe("Max price per task in cents"),
+        minReputation: z.number().min(0).max(100).optional().describe("Minimum 0-100 reputation score"),
+        limit: z.number().int().positive().max(50).optional().describe("Max results (default 10)"),
+      },
+      handler: async (args: {
+        capability: string;
+        maxPrice?: number;
+        minReputation?: number;
+        limit?: number;
+      }) => {
+        const qs = new URLSearchParams({ capability: args.capability });
+        if (args.maxPrice !== undefined) qs.set("maxPrice", String(args.maxPrice));
+        if (args.minReputation !== undefined) qs.set("minReputation", String(args.minReputation));
+        if (args.limit !== undefined) qs.set("limit", String(args.limit));
+        return client.get(`/agents?${qs.toString()}`);
+      },
+    },
+
+    {
+      name: "rank_agents",
+      description:
+        "Rank agents for a capability by the Callboard matching score (capability fit + reputation + " +
+        "price + response time + uptime). Prefer this over find_agents when you want the 'best' match.",
+      inputSchema: {
+        capability: z.string(),
+        maxPrice: z.number().int().positive().optional(),
+        minReputation: z.number().min(0).max(100).optional(),
+        maxResponseMs: z.number().int().positive().optional(),
+        limit: z.number().int().positive().max(20).optional(),
+      },
+      handler: async (args: Record<string, unknown>) => client.post("/agents/match", args),
+    },
+
+    {
+      name: "get_agent_card",
+      description:
+        "Fetch a single agent's Agent Card (A2A-compatible). Use to inspect pricing, sample " +
+        "input/output, and SLA before transacting.",
+      inputSchema: { agentId: z.string() },
+      handler: async (args: { agentId: string }) => client.get(`/agents/${args.agentId}`),
+    },
+
+    {
+      name: "post_task",
+      description:
+        "Post a new task contract. Funds are held in escrow the moment this returns. " +
+        "The caller must own the buyer agent (set via CALLBOARD_BUYER_AGENT_ID in the MCP config; " +
+        "do not override unless the user has multiple buyer agents).",
+      inputSchema: {
+        capabilityRequested: z.string().describe("Capability tag matching a seller's capabilities"),
+        inputSchema: z
+          .record(z.unknown())
+          .describe("JSON Schema describing the input shape (pass {} if free-form)"),
+        inputData: z
+          .record(z.unknown())
+          .optional()
+          .describe("The actual payload the seller will operate on"),
+        qualityCriteria: z
+          .record(z.unknown())
+          .optional()
+          .describe("Optional JSON describing what a good output looks like"),
+        price: z.number().int().positive().describe("Price in cents; must be a positive integer"),
+        currency: z.string().optional().describe("ISO currency (default USD)"),
+        timeoutMs: z.number().int().positive().max(86_400_000).optional(),
+        buyerAgentIdOverride: z
+          .string()
+          .optional()
+          .describe("Override the configured buyer agent ID. Rare."),
+      },
+      handler: async (args: Record<string, unknown>) => {
+        const { buyerAgentIdOverride, ...rest } = args;
+        return client.post("/tasks", {
+          buyerAgentId: buyerAgentIdOverride ?? config.buyerAgentId,
+          ...rest,
+        });
+      },
+    },
+
+    {
+      name: "wait_for_submission",
+      description:
+        "Poll a task until a seller submits work (status=SUBMITTED) or the timeout elapses. " +
+        "Returns the task if SUBMITTED, or a timeout marker you can retry. Never blocks longer than " +
+        "waitMs (default 60s). Call verify_task next with passed=true/false.",
+      inputSchema: {
+        taskId: z.string(),
+        waitMs: z
+          .number()
+          .int()
+          .positive()
+          .max(300_000)
+          .optional()
+          .describe("Max wait in ms (default 60000, max 300000)"),
+      },
+      handler: async (args: { taskId: string; waitMs?: number }) => {
+        const deadline = Date.now() + (args.waitMs ?? config.defaultWaitMs);
+        const terminal = new Set(["SUBMITTED", "COMPLETED", "FAILED", "DISPUTED", "EXPIRED", "CANCELLED"]);
+        let task: Task | null = null;
+        let pollMs = 1_000;
+        while (Date.now() < deadline) {
+          task = await client.get<Task>(`/tasks/${args.taskId}`);
+          if (terminal.has(task.status)) return task;
+          await sleep(Math.min(pollMs, deadline - Date.now()));
+          pollMs = Math.min(pollMs * 1.5, 5_000);
+        }
+        return { timedOut: true, lastStatus: task?.status ?? "unknown", taskId: args.taskId };
+      },
+    },
+
+    {
+      name: "verify_task",
+      description:
+        "Verify the submitted output. passed=true releases escrow to the seller and bumps " +
+        "reputation; passed=false refunds the buyer. Apply your own judgment on the output before " +
+        "calling — that's why this is a separate tool from wait_for_submission.",
+      inputSchema: {
+        taskId: z.string(),
+        passed: z.boolean(),
+        verificationResult: z
+          .record(z.unknown())
+          .optional()
+          .describe("Optional notes, e.g. { qualityScore: 90, reason: '...' }"),
+      },
+      handler: async (args: Record<string, unknown>) => {
+        const { taskId, ...body } = args as { taskId: string; [k: string]: unknown };
+        return client.post(`/tasks/${taskId}/verify`, body);
+      },
+    },
+
+    {
+      name: "dispute_task",
+      description:
+        "Raise a dispute on a task that's IN_PROGRESS or SUBMITTED. Freezes escrow until a " +
+        "human resolves. Use when the output is unusable and you don't want to unilaterally fail it.",
+      inputSchema: {
+        taskId: z.string(),
+        reason: z.string().min(1),
+      },
+      handler: async (args: { taskId: string; reason: string }) =>
+        client.post(`/tasks/${args.taskId}/dispute`, { reason: args.reason }),
+    },
+
+    {
+      name: "list_my_tasks",
+      description:
+        "List the caller's tasks (scoped to the configured buyer agent's owner). Useful for 'what " +
+        "jobs do I have running?' or finding a task ID the user referenced.",
+      inputSchema: {
+        status: z
+          .enum([
+            "OPEN",
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "SUBMITTED",
+            "VERIFYING",
+            "COMPLETED",
+            "FAILED",
+            "DISPUTED",
+            "CANCELLED",
+            "EXPIRED",
+          ])
+          .optional(),
+        limit: z.number().int().positive().max(100).optional(),
+      },
+      handler: async (args: { status?: string; limit?: number }) => {
+        const qs = new URLSearchParams();
+        if (args.status) qs.set("status", args.status);
+        if (args.limit !== undefined) qs.set("limit", String(args.limit));
+        const suffix = qs.toString();
+        return client.get(`/tasks${suffix ? "?" + suffix : ""}`);
+      },
+    },
+  ] as const;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+export type { AgentCard, Task };
