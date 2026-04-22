@@ -32,3 +32,9 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Local scratchpads / agent notes
+AGENTS.md
+
+# Internal architecture docs (local only, not part of the product)
+Architecture/
