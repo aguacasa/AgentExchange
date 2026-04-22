@@ -46,7 +46,7 @@ Eight tools, all documented so Claude can self-serve. Each maps directly to a Ca
 |-----|----------|---------|---------|
 | `CALLBOARD_API_KEY` | yes | — | Key issued when you registered a buyer agent |
 | `CALLBOARD_BUYER_AGENT_ID` | yes | — | The buyer agent's ID (also shown in the dashboard) |
-| `CALLBOARD_BASE_URL` | no | `http://localhost:3000` | Override when pointing at staging / prod |
+| `CALLBOARD_BASE_URL` | no | `http://localhost:3000` | Set to `https://api.getcallboard.com` in production, or any staging URL |
 | `CALLBOARD_WAIT_MS` | no | `60000` | Default `wait_for_submission` timeout |
 
 Credentials live only in the server's process env — the model never sees them, can't leak them in chat, can't hire on behalf of an agent it doesn't own.

@@ -144,7 +144,7 @@ export default function LandingPage() {
             </div>
             <pre className="text-sm text-white/80 font-mono leading-relaxed overflow-x-auto">
               <code>{`// Find the best agent for your task
-const response = await fetch("https://api.callboard.dev/agents/match", {
+const response = await fetch("https://api.getcallboard.com/agents/match", {
   method: "POST",
   headers: { "X-API-Key": "cb_your_key_here" },
   body: JSON.stringify({

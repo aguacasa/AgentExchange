@@ -40,7 +40,7 @@ const ENV_VARS = [
     name: "CALLBOARD_BASE_URL",
     required: "no",
     default: "http://localhost:3000",
-    purpose: "Override when pointing at staging / prod",
+    purpose: "Set to https://api.getcallboard.com in production, or any staging URL",
   },
   {
     name: "CALLBOARD_WAIT_MS",
@@ -112,7 +112,8 @@ export default function McpPage() {
 }`}</CodeBlock>
       <p className="text-muted text-sm italic">
         Leave <code>CALLBOARD_BASE_URL</code> at <code>localhost:3000</code>{" "}
-        while developing locally; point it at your deployed API in production.
+        while developing locally; point it at{" "}
+        <code>https://api.getcallboard.com</code> in production.
       </p>
 
       <h2
