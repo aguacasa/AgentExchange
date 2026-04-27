@@ -53,11 +53,17 @@ export class MockPaymentProvider implements PaymentProvider {
 // Singleton — switch provider here when integrating real payments
 let provider: PaymentProvider = new MockPaymentProvider();
 
-// Production guard: prevent mock provider from being used in production
-if (process.env.NODE_ENV === "production" && provider.name === "mock") {
+// Production guard: prevent mock escrow unless the deploy is explicitly
+// running as a demo/waitlist launch before real payments are wired.
+if (
+  process.env.NODE_ENV === "production" &&
+  provider.name === "mock" &&
+  process.env.ALLOW_MOCK_PAYMENT_PROVIDER !== "true"
+) {
   throw new Error(
     "FATAL: MockPaymentProvider cannot be used in production. " +
-    "Configure a real payment provider (Stripe, USDC, Skyfire)."
+    "Configure a real payment provider (Stripe, USDC, Skyfire) or set " +
+    "ALLOW_MOCK_PAYMENT_PROVIDER=true for a demo-only deployment."
   );
 }
 

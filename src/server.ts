@@ -40,8 +40,6 @@ let redisClient: Redis | null = null;
 if (process.env.REDIS_URL && process.env.NODE_ENV !== "test") {
   redisClient = new Redis(process.env.REDIS_URL, {
     maxRetriesPerRequest: 3,
-    enableOfflineQueue: false,
-    lazyConnect: true,
   });
   redisClient.on("error", (err) => {
     console.error("[redis] rate limiter connection error:", err.message);

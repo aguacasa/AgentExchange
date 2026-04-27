@@ -38,6 +38,7 @@ services:
       # A real 64-char random value — just not the literal default. Never use this in prod.
       API_KEY_SALT: local-prod-test-salt-not-for-production-use-ever-xxxxxxxxxxxxxxxxxx
       CORS_ORIGINS: http://localhost:3001
+      ALLOW_MOCK_PAYMENT_PROVIDER: "true"
     depends_on:
       postgres:
         condition: service_healthy

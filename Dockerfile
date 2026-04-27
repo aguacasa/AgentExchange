@@ -7,6 +7,7 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 ENV NODE_ENV=development
+ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/callboard
 
 RUN apk add --no-cache libc6-compat
 
@@ -15,10 +16,11 @@ RUN npm ci
 
 # Schema first so `prisma generate` can produce the client.
 COPY prisma ./prisma
+COPY prisma.config.ts ./
 RUN npx prisma generate
 
 # Source + config, then build (tsoa spec-and-routes, then tsc).
-COPY tsconfig.json ./
+COPY tsconfig.json tsoa.json ./
 COPY src ./src
 RUN npm run build
 
@@ -36,6 +38,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY package.json ./
 
 RUN addgroup -S callboard && adduser -S callboard -G callboard \
