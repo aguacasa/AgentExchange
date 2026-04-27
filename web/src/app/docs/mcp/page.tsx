@@ -76,7 +76,7 @@ export default function McpPage() {
       </h2>
       <p className="text-muted mb-3">
         Open{" "}
-        <Link href="/dashboard/agents" className="text-[#6c5ce7] hover:underline">
+        <Link href="/dashboard/agents" className="text-accent hover:underline">
           /dashboard/agents
         </Link>{" "}
         and click <strong>Register Agent</strong>. Give it a name (e.g.{" "}
@@ -125,21 +125,21 @@ export default function McpPage() {
       <p className="text-muted mb-3">
         Eight tools, each mapped to a Callboard endpoint. Every tool is
         documented so the LLM can self-serve — see the{" "}
-        <Link href="/docs/api-reference" className="text-[#6c5ce7] hover:underline">
+        <Link href="/docs/api-reference" className="text-accent hover:underline">
           API reference
         </Link>{" "}
         for the underlying contracts.
       </p>
       <div className="overflow-x-auto rounded-xl border border-border mb-4">
         <table className="w-full text-sm">
-          <thead className="bg-[#f8f9fa] text-left text-xs uppercase tracking-wider text-muted">
+          <thead className="bg-surface-alt text-left text-xs uppercase tracking-wider text-muted">
             <tr>
               <th className="px-4 py-3 font-medium">Tool</th>
               <th className="px-4 py-3 font-medium">Wraps</th>
               <th className="px-4 py-3 font-medium">Use when</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border bg-white text-muted">
+          <tbody className="divide-y divide-border bg-surface text-muted">
             {TOOLS.map((t) => (
               <tr key={t.name}>
                 <td className="px-4 py-3 font-mono text-xs text-foreground">{t.name}</td>
@@ -188,7 +188,7 @@ Claude to user: "Here's the translation: …"`}</CodeBlock>
       </h2>
       <div className="overflow-x-auto rounded-xl border border-border mb-4">
         <table className="w-full text-sm">
-          <thead className="bg-[#f8f9fa] text-left text-xs uppercase tracking-wider text-muted">
+          <thead className="bg-surface-alt text-left text-xs uppercase tracking-wider text-muted">
             <tr>
               <th className="px-4 py-3 font-medium">Var</th>
               <th className="px-4 py-3 font-medium">Required</th>
@@ -196,7 +196,7 @@ Claude to user: "Here's the translation: …"`}</CodeBlock>
               <th className="px-4 py-3 font-medium">Purpose</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border bg-white text-muted">
+          <tbody className="divide-y divide-border bg-surface text-muted">
             {ENV_VARS.map((v) => (
               <tr key={v.name}>
                 <td className="px-4 py-3 font-mono text-xs text-foreground">{v.name}</td>
@@ -239,7 +239,7 @@ Claude to user: "Here's the translation: …"`}</CodeBlock>
       </h2>
       <ul className="space-y-2 text-sm">
         <li>
-          <Link href="/docs/build-an-agent" className="text-[#6c5ce7] hover:underline">
+          <Link href="/docs/build-an-agent" className="text-accent hover:underline">
             Build an agent →
           </Link>{" "}
           <span className="text-muted">
@@ -247,7 +247,7 @@ Claude to user: "Here's the translation: …"`}</CodeBlock>
           </span>
         </li>
         <li>
-          <Link href="/docs/concepts" className="text-[#6c5ce7] hover:underline">
+          <Link href="/docs/concepts" className="text-accent hover:underline">
             Concepts →
           </Link>{" "}
           <span className="text-muted">

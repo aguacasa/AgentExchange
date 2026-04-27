@@ -29,15 +29,15 @@ export function ApiKeyBanner() {
 
   if (hasKey) {
     return (
-      <div className="mb-6 flex items-center justify-between px-4 py-3 bg-[#00b894]/10 border border-[#00b894]/20 rounded-xl">
+      <div className="mb-6 flex items-center justify-between px-4 py-3 bg-success/10 border border-success/30 rounded-xl">
         <div className="flex items-center gap-2 text-sm">
-          <span className="w-2 h-2 rounded-full bg-[#00b894]" />
-          <span className="text-[#00b894] font-medium">API key loaded</span>
-          <span className="text-[#6b7280]">(prefix: {getStoredApiKey().slice(0, 11)}…)</span>
+          <span className="w-2 h-2 rounded-full bg-success" />
+          <span className="text-success font-medium">API key loaded</span>
+          <span className="text-muted">(prefix: {getStoredApiKey().slice(0, 11)}…)</span>
         </div>
         <button
           onClick={clear}
-          className="text-xs text-[#6b7280] hover:text-[#e17055] transition-colors"
+          className="text-xs text-muted hover:text-danger transition-colors"
         >
           Clear key
         </button>
@@ -46,13 +46,13 @@ export function ApiKeyBanner() {
   }
 
   return (
-    <div className="mb-6 px-4 py-3 bg-[#fdcb6e]/10 border border-[#fdcb6e]/30 rounded-xl">
+    <div className="mb-6 px-4 py-3 bg-warning/10 border border-warning/30 rounded-xl">
       <div className="flex items-center gap-2 text-sm mb-2">
-        <span className="w-2 h-2 rounded-full bg-[#fdcb6e]" />
-        <span className="text-[#d63031] font-medium">No API key set — data is read-only mock data</span>
+        <span className="w-2 h-2 rounded-full bg-warning" />
+        <span className="text-warning font-medium">No API key set — data is read-only mock data</span>
       </div>
-      <p className="text-xs text-[#6b7280] mb-3">
-        Paste a key from <code className="px-1 py-0.5 bg-white rounded">npm run db:seed</code> to load real data:
+      <p className="text-xs text-muted mb-3">
+        Paste a key from <code className="px-1 py-0.5 bg-surface-alt text-foreground rounded border border-border">npm run db:seed</code> to load real data:
       </p>
       <div className="flex gap-2">
         <input
@@ -60,13 +60,13 @@ export function ApiKeyBanner() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="cb_..."
-          className="flex-1 px-3 py-2 text-sm font-mono border border-[#e5e7eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6c5ce7]/20"
+          className="flex-1 px-3 py-2 text-sm font-mono border border-border bg-surface text-foreground placeholder:text-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
           onKeyDown={(e) => e.key === "Enter" && save()}
         />
         <button
           onClick={save}
           disabled={!input.trim()}
-          className="px-4 py-2 bg-[#6c5ce7] text-white rounded-lg text-sm font-medium hover:bg-[#6c5ce7]/90 transition-colors disabled:opacity-50"
+          className="px-4 py-2 bg-accent-strong text-white rounded-lg text-sm font-medium hover:bg-accent-strong/90 transition-colors disabled:opacity-50"
         >
           Save Key
         </button>

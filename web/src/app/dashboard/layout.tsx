@@ -50,20 +50,20 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen bg-[#f8f9fa]">
+    <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-[#e5e7eb] flex flex-col">
-        <div className="h-16 flex items-center gap-2 px-6 border-b border-[#e5e7eb]">
+      <aside className="w-64 bg-surface border-r border-border flex flex-col">
+        <div className="h-16 flex items-center gap-2 px-6 border-b border-border">
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo.svg" alt="Callboard" className="w-8 h-8" />
-            <span className="font-bold text-lg tracking-wide" style={{ fontFamily: "var(--font-dm-serif)" }}>
+            <span className="font-bold text-lg tracking-wide text-foreground" style={{ fontFamily: "var(--font-dm-serif)" }}>
               Callboard
             </span>
           </Link>
         </div>
 
         <nav className="flex-1 py-4 px-3">
-          <div className="text-[10px] font-medium text-[#6b7280] uppercase tracking-wider px-3 mb-2">
+          <div className="text-[10px] font-medium text-muted uppercase tracking-wider px-3 mb-2">
             Dashboard
           </div>
           {NAV_ITEMS.map((item) => {
@@ -77,8 +77,8 @@ export default function DashboardLayout({
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm mb-0.5 transition-colors ${
                   isActive
-                    ? "bg-[#6c5ce7]/10 text-[#6c5ce7] font-medium"
-                    : "text-[#6b7280] hover:bg-[#f8f9fa] hover:text-[#0f0f0f]"
+                    ? "bg-accent/15 text-accent font-medium"
+                    : "text-muted hover:bg-surface-alt hover:text-foreground"
                 }`}
               >
                 {item.icon}
@@ -88,9 +88,9 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        <div className="p-4 border-t border-[#e5e7eb]">
-          <div className="text-xs text-[#6b7280]">Callboard v0.1.0</div>
-          <div className="text-xs text-[#6b7280]">Developer Preview</div>
+        <div className="p-4 border-t border-border">
+          <div className="text-xs text-muted">Callboard v0.1.0</div>
+          <div className="text-xs text-muted">Developer Preview</div>
         </div>
       </aside>
 

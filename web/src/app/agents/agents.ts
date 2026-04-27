@@ -43,8 +43,22 @@ export const CATEGORY_COLORS: Record<Category, string> = {
 };
 
 export function categoryTint(category: Category): { backgroundColor: string; color: string } {
-  const hex = CATEGORY_COLORS[category];
-  return { backgroundColor: `${hex}1a`, color: hex };
+  const tint = lightenForDark(CATEGORY_COLORS[category]);
+  return { backgroundColor: `${tint}26`, color: tint };
+}
+
+export function lightenForDark(hex: string): string {
+  const m = /^#([\da-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  let r = (n >> 16) & 0xff;
+  let g = (n >> 8) & 0xff;
+  let b = n & 0xff;
+  const mix = 0.45;
+  r = Math.round(r + (255 - r) * mix);
+  g = Math.round(g + (255 - g) * mix);
+  b = Math.round(b + (255 - b) * mix);
+  return "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
 }
 
 export interface Agent {

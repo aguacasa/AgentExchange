@@ -1,14 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #0f0f0f;
-  --muted: #6b7280;
-  --accent: #6c5ce7;
-  --accent-light: #a29bfe;
-  --surface: #f8f9fa;
-  --surface-dark: #0a0a0f;
-  --border: #e5e7eb;
+  --background: #0a0a0f;
+  --foreground: #ededed;
+  --muted: #9ca3af;
+  --accent: #a29bfe;
+  --accent-strong: #6c5ce7;
+  --accent-light: #c5bdff;
+  --surface: #13131a;
+  --surface-alt: #1a1a24;
+  --surface-dark: #050509;
+  --border: #27272f;
+  --border-strong: #383846;
   --success: #00b894;
   --warning: #fdcb6e;
   --danger: #e17055;
@@ -19,15 +22,22 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
   --color-accent-light: var(--accent-light);
   --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
   --color-surface-dark: var(--surface-dark);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --font-sans: var(--font-dm-sans);
   --font-serif: var(--font-dm-serif);
+}
+
+html {
+  color-scheme: dark;
 }
 
 body {
@@ -41,31 +51,39 @@ html { scroll-behavior: smooth; }
 
 /* Gradient text utility */
 .gradient-text {
-  background: linear-gradient(135deg, #6c5ce7, #a29bfe, #74b9ff);
+  background: linear-gradient(135deg, #a29bfe, #c5bdff, #74b9ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Dark pitch block */
+/* Dark pitch block — slightly elevated than page bg */
 .pitch-block {
-  background: linear-gradient(180deg, #0a0a0f 0%, #13131a 100%);
+  background: linear-gradient(180deg, #13131a 0%, #1a1a24 100%);
   color: #ededed;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 /* Stat card hover */
 .stat-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(108, 92, 231, 0.12);
+  box-shadow: 0 8px 30px rgba(108, 92, 231, 0.25);
+  border-color: rgba(162, 155, 254, 0.4);
 }
 
 /* Subtle grid background */
 .grid-bg {
   background-image:
-    linear-gradient(rgba(108, 92, 231, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(108, 92, 231, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(162, 155, 254, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(162, 155, 254, 0.06) 1px, transparent 1px);
   background-size: 60px 60px;
+}
+
+/* Form controls — make native widgets render dark */
+input, select, textarea {
+  color-scheme: dark;
 }

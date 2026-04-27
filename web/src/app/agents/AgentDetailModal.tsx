@@ -36,15 +36,15 @@ export function AgentDetailModal({ agent, onClose }: AgentDetailModalProps) {
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
       />
 
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-[#e5e7eb] max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-2xl bg-surface rounded-2xl shadow-2xl border border-border max-h-[90vh] overflow-y-auto">
         <button
           type="button"
           aria-label="Close"
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:bg-[#f8f9fa] hover:text-foreground transition-colors z-10"
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:bg-surface-alt hover:text-foreground transition-colors z-10"
         >
           <svg
             viewBox="0 0 24 24"
@@ -68,7 +68,7 @@ export function AgentDetailModal({ agent, onClose }: AgentDetailModalProps) {
             {agent.trustBadges.map((b) => (
               <span
                 key={b}
-                className="inline-block text-[10.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#00b894]/10 text-[#00b894]"
+                className="inline-block text-[10.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-success/15 text-success"
               >
                 {b}
               </span>
@@ -78,7 +78,7 @@ export function AgentDetailModal({ agent, onClose }: AgentDetailModalProps) {
 
           <h2
             id="agent-detail-title"
-            className="text-3xl md:text-4xl mb-2 leading-tight"
+            className="text-3xl md:text-4xl mb-2 leading-tight text-foreground"
             style={{ fontFamily: "var(--font-dm-serif)" }}
           >
             {agent.name}
@@ -94,7 +94,7 @@ export function AgentDetailModal({ agent, onClose }: AgentDetailModalProps) {
               {agent.capabilities.map((c) => (
                 <span
                   key={c}
-                  className="text-xs px-2 py-0.5 rounded bg-[#6c5ce7]/10 text-[#6c5ce7]"
+                  className="text-xs px-2 py-0.5 rounded bg-accent/15 text-accent"
                 >
                   {c}
                 </span>
@@ -114,10 +114,10 @@ export function AgentDetailModal({ agent, onClose }: AgentDetailModalProps) {
           </Section>
 
           <Section title="Pricing">
-            <div className="p-4 rounded-xl bg-[#f8f9fa] border border-[#e5e7eb] flex items-baseline justify-between">
+            <div className="p-4 rounded-xl bg-surface-alt border border-border flex items-baseline justify-between">
               <div>
                 <div
-                  className="text-2xl"
+                  className="text-2xl text-foreground"
                   style={{ fontFamily: "var(--font-dm-serif)" }}
                 >
                   {formatCents(agent.pricePerTaskCents)}
@@ -129,13 +129,13 @@ export function AgentDetailModal({ agent, onClose }: AgentDetailModalProps) {
           </Section>
 
           <Section title="Sample input">
-            <div className="p-4 rounded-xl bg-[#0d0d12] text-white/80 text-xs font-mono leading-relaxed overflow-x-auto">
+            <div className="p-4 rounded-xl bg-surface-dark border border-border text-foreground/80 text-xs font-mono leading-relaxed overflow-x-auto">
               {agent.sampleInput}
             </div>
           </Section>
 
           <Section title="Sample output">
-            <div className="p-4 rounded-xl bg-[#0d0d12] text-white/80 text-xs font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap">
+            <div className="p-4 rounded-xl bg-surface-dark border border-border text-foreground/80 text-xs font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap">
               {agent.sampleOutput}
             </div>
           </Section>
@@ -145,7 +145,7 @@ export function AgentDetailModal({ agent, onClose }: AgentDetailModalProps) {
             onClick={() =>
               alert(`Hiring flow for ${agent.name} will launch after developer preview.`)
             }
-            className="w-full mt-2 px-6 py-3 bg-[#6c5ce7] text-white rounded-xl font-medium hover:bg-[#6c5ce7]/90 transition-colors"
+            className="w-full mt-2 px-6 py-3 bg-accent-strong text-white rounded-xl font-medium hover:bg-accent-strong/90 transition-colors"
           >
             Hire {agent.name}
           </button>
@@ -179,14 +179,14 @@ function Stat({
 }) {
   const toneClass =
     tone === "good"
-      ? "text-[#00b894]"
+      ? "text-success"
       : tone === "warn"
-      ? "text-[#b08a2a]"
+      ? "text-warning"
       : tone === "bad"
-      ? "text-[#e17055]"
+      ? "text-danger"
       : "text-foreground";
   return (
-    <div className="p-3 rounded-lg border border-[#e5e7eb] bg-white">
+    <div className="p-3 rounded-lg border border-border bg-surface-alt">
       <div className="text-[10.5px] font-bold uppercase tracking-wider text-muted mb-1">
         {label}
       </div>
