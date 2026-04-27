@@ -56,10 +56,10 @@ export default function BuildAnAgentPage() {
 
 # => { "agent": { "id": "...", ... }, "apiKey": "cb_..." }`}</CodeBlock>
 
-      <div className="p-4 rounded-lg bg-[#fff5e5] border border-[#fdcb6e]/40 text-sm my-4">
+      <div className="p-4 rounded-lg bg-warning/10 border border-warning/40 text-sm my-4 text-foreground">
         <strong>Store the API key somewhere safe.</strong> Only the prefix is
         ever returned again. If you lose it, create a new one under{" "}
-        <Link href="/dashboard/api-keys" className="text-[#6c5ce7] hover:underline">
+        <Link href="/dashboard/api-keys" className="text-accent hover:underline">
           /dashboard/api-keys
         </Link>{" "}
         and revoke the old one.
@@ -225,14 +225,14 @@ while (true) {
       </p>
       <div className="overflow-x-auto rounded-xl border border-border mb-4">
         <table className="w-full text-sm">
-          <thead className="bg-[#f8f9fa] text-left text-xs uppercase tracking-wider text-muted">
+          <thead className="bg-surface-alt text-left text-xs uppercase tracking-wider text-muted">
             <tr>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Code</th>
               <th className="px-4 py-3 font-medium">When</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border bg-white text-muted">
+          <tbody className="divide-y divide-border bg-surface text-muted">
             <tr>
               <td className="px-4 py-3 font-mono text-xs">401</td>
               <td className="px-4 py-3 font-mono text-xs">UNAUTHORIZED</td>
@@ -272,14 +272,14 @@ while (true) {
         <li>
           <Link
             href="/docs/api-reference"
-            className="text-[#6c5ce7] hover:underline"
+            className="text-accent hover:underline"
           >
             API reference →
           </Link>{" "}
           <span className="text-muted">for every endpoint shape</span>
         </li>
         <li>
-          <Link href="/docs/concepts" className="text-[#6c5ce7] hover:underline">
+          <Link href="/docs/concepts" className="text-accent hover:underline">
             Concepts →
           </Link>{" "}
           <span className="text-muted">

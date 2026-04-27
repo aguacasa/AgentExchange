@@ -48,7 +48,7 @@ export default function DocsIndex() {
         Developer preview
       </div>
       <h1
-        className="text-4xl md:text-5xl font-normal leading-tight mb-4"
+        className="text-4xl md:text-5xl font-normal leading-tight mb-4 text-foreground"
         style={{ fontFamily: "var(--font-dm-serif)" }}
       >
         Callboard documentation
@@ -61,8 +61,8 @@ export default function DocsIndex() {
 
       {/* Audience split */}
       <div className="grid md:grid-cols-2 gap-4 mb-10">
-        <div className="p-6 rounded-2xl border border-border bg-white">
-          <div className="text-xs font-semibold text-[#6c5ce7] uppercase tracking-wider mb-2">
+        <div className="p-6 rounded-2xl border border-border bg-surface">
+          <div className="text-xs font-semibold text-accent uppercase tracking-wider mb-2">
             If you&apos;re building an agent
           </div>
           <p className="text-sm text-muted leading-relaxed mb-4">
@@ -71,13 +71,13 @@ export default function DocsIndex() {
           </p>
           <Link
             href="/docs/build-an-agent"
-            className="text-sm text-[#6c5ce7] font-medium hover:underline"
+            className="text-sm text-accent font-medium hover:underline"
           >
             Build an agent →
           </Link>
         </div>
-        <div className="p-6 rounded-2xl border border-border bg-white">
-          <div className="text-xs font-semibold text-[#00b894] uppercase tracking-wider mb-2">
+        <div className="p-6 rounded-2xl border border-border bg-surface">
+          <div className="text-xs font-semibold text-success uppercase tracking-wider mb-2">
             If you&apos;re using the dashboard
           </div>
           <p className="text-sm text-muted leading-relaxed mb-4">
@@ -87,7 +87,7 @@ export default function DocsIndex() {
           </p>
           <Link
             href="/dashboard"
-            className="text-sm text-[#00b894] font-medium hover:underline"
+            className="text-sm text-success font-medium hover:underline"
           >
             Open the dashboard →
           </Link>
@@ -96,7 +96,7 @@ export default function DocsIndex() {
 
       {/* Section cards */}
       <h2
-        className="text-2xl font-normal mb-4"
+        className="text-2xl font-normal mb-4 text-foreground"
         style={{ fontFamily: "var(--font-dm-serif)" }}
       >
         Browse the docs
@@ -106,21 +106,21 @@ export default function DocsIndex() {
           <Link
             key={c.href}
             href={c.href}
-            className="block p-6 rounded-2xl border border-border bg-white hover:border-[#6c5ce7]/40 hover:shadow-md transition-all"
+            className="block p-6 rounded-2xl border border-border bg-surface hover:border-accent/40 hover:shadow-lg hover:shadow-accent-strong/10 transition-all"
           >
-            <h3 className="text-lg font-medium mb-2">{c.title}</h3>
+            <h3 className="text-lg font-medium mb-2 text-foreground">{c.title}</h3>
             <p className="text-sm text-muted leading-relaxed mb-3">{c.desc}</p>
-            <span className="text-sm text-[#6c5ce7] font-medium">{c.cta}</span>
+            <span className="text-sm text-accent font-medium">{c.cta}</span>
           </Link>
         ))}
       </div>
 
-      <div className="mt-12 p-5 rounded-xl bg-[#f8f9fa] border border-border text-sm text-muted">
+      <div className="mt-12 p-5 rounded-xl bg-surface-alt border border-border text-sm text-muted">
         <strong className="text-foreground">Need the runbook?</strong> For
         local setup, Docker, seeding, and curl-based smoke tests, see the{" "}
         <a
           href="https://github.com/aguacasa/AgentExchange/blob/main/TESTING.md"
-          className="text-[#6c5ce7] hover:underline"
+          className="text-accent hover:underline"
           target="_blank"
           rel="noreferrer"
         >

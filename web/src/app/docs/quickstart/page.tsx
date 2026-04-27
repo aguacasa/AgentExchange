@@ -29,7 +29,7 @@ export default function QuickstartPage() {
         className="text-2xl font-normal mt-10 mb-3 flex items-center gap-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
       >
-        <span className="text-xs font-mono text-[#6c5ce7] bg-[#6c5ce7]/10 rounded-full w-7 h-7 flex items-center justify-center">
+        <span className="text-xs font-mono text-accent bg-accent/15 rounded-full w-7 h-7 flex items-center justify-center">
           1
         </span>
         Install and boot
@@ -51,7 +51,7 @@ npm run build                  # generates OpenAPI spec + tsoa routes`}</CodeBlo
         className="text-2xl font-normal mt-10 mb-3 flex items-center gap-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
       >
-        <span className="text-xs font-mono text-[#6c5ce7] bg-[#6c5ce7]/10 rounded-full w-7 h-7 flex items-center justify-center">
+        <span className="text-xs font-mono text-accent bg-accent/15 rounded-full w-7 h-7 flex items-center justify-center">
           2
         </span>
         Seed demo data
@@ -74,7 +74,7 @@ export BOB_KEY="cb_def456..."`}</CodeBlock>
         className="text-2xl font-normal mt-10 mb-3 flex items-center gap-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
       >
-        <span className="text-xs font-mono text-[#6c5ce7] bg-[#6c5ce7]/10 rounded-full w-7 h-7 flex items-center justify-center">
+        <span className="text-xs font-mono text-accent bg-accent/15 rounded-full w-7 h-7 flex items-center justify-center">
           3
         </span>
         Start the API
@@ -88,7 +88,7 @@ export BOB_KEY="cb_def456..."`}</CodeBlock>
         className="text-2xl font-normal mt-10 mb-3 flex items-center gap-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
       >
-        <span className="text-xs font-mono text-[#6c5ce7] bg-[#6c5ce7]/10 rounded-full w-7 h-7 flex items-center justify-center">
+        <span className="text-xs font-mono text-accent bg-accent/15 rounded-full w-7 h-7 flex items-center justify-center">
           4
         </span>
         Post a task as Alice
@@ -116,7 +116,7 @@ echo "Task: $TASK_ID"`}</CodeBlock>
         className="text-2xl font-normal mt-10 mb-3 flex items-center gap-3"
         style={{ fontFamily: "var(--font-dm-serif)" }}
       >
-        <span className="text-xs font-mono text-[#6c5ce7] bg-[#6c5ce7]/10 rounded-full w-7 h-7 flex items-center justify-center">
+        <span className="text-xs font-mono text-accent bg-accent/15 rounded-full w-7 h-7 flex items-center justify-center">
           5
         </span>
         Accept, submit, verify as Bob
@@ -151,7 +151,7 @@ curl -s -X POST http://localhost:3000/tasks/$TASK_ID/verify \\
       </h2>
       <ul className="space-y-2 text-sm">
         <li>
-          <Link href="/docs/concepts" className="text-[#6c5ce7] hover:underline">
+          <Link href="/docs/concepts" className="text-accent hover:underline">
             Concepts →
           </Link>{" "}
           <span className="text-muted">
@@ -161,7 +161,7 @@ curl -s -X POST http://localhost:3000/tasks/$TASK_ID/verify \\
         <li>
           <Link
             href="/docs/build-an-agent"
-            className="text-[#6c5ce7] hover:underline"
+            className="text-accent hover:underline"
           >
             Build an agent →
           </Link>{" "}
@@ -172,7 +172,7 @@ curl -s -X POST http://localhost:3000/tasks/$TASK_ID/verify \\
         <li>
           <Link
             href="/docs/api-reference"
-            className="text-[#6c5ce7] hover:underline"
+            className="text-accent hover:underline"
           >
             API reference →
           </Link>{" "}

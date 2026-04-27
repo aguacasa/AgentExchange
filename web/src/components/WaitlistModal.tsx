@@ -94,16 +94,16 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-[#e5e7eb] max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-surface rounded-2xl shadow-2xl border border-border max-h-[90vh] overflow-y-auto">
         <button
           type="button"
           aria-label="Close"
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:bg-[#f8f9fa] hover:text-foreground transition-colors"
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:bg-surface-alt hover:text-foreground transition-colors"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -113,12 +113,12 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
         <div className="p-8">
           {done ? (
             <div className="text-center py-6">
-              <div className="w-12 h-12 rounded-full bg-[#00b894]/10 text-[#00b894] flex items-center justify-center mx-auto mb-4 text-2xl">
+              <div className="w-12 h-12 rounded-full bg-success/15 text-success flex items-center justify-center mx-auto mb-4 text-2xl">
                 ✓
               </div>
               <h3
                 id="waitlist-title"
-                className="text-2xl mb-2"
+                className="text-2xl mb-2 text-foreground"
                 style={{ fontFamily: "var(--font-dm-serif)" }}
               >
                 You&apos;re on the list
@@ -129,7 +129,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-2.5 bg-foreground text-white rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors"
+                className="px-6 py-2.5 bg-accent-strong text-white rounded-xl text-sm font-medium hover:bg-accent-strong/90 transition-colors"
               >
                 Close
               </button>
@@ -138,7 +138,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
             <>
               <h3
                 id="waitlist-title"
-                className="text-2xl mb-2"
+                className="text-2xl mb-2 text-foreground"
                 style={{ fontFamily: "var(--font-dm-serif)" }}
               >
                 Join the Callboard waitlist
@@ -194,8 +194,8 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                         onClick={() => setForm({ ...form, role: r })}
                         className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
                           form.role === r
-                            ? "border-[#6c5ce7] bg-[#6c5ce7]/5 text-[#6c5ce7]"
-                            : "border-[#e5e7eb] text-muted hover:border-foreground/30"
+                            ? "border-accent bg-accent/15 text-accent"
+                            : "border-border bg-surface-alt text-muted hover:border-accent/40 hover:text-foreground"
                         }`}
                       >
                         {r === "BUYER" ? "Buyer agent" : r === "SELLER" ? "Seller agent" : "Both"}
@@ -216,7 +216,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                 </Field>
 
                 {error && (
-                  <div className="px-3 py-2 rounded-lg bg-[#e17055]/10 border border-[#e17055]/20 text-sm text-[#e17055]">
+                  <div className="px-3 py-2 rounded-lg bg-danger/10 border border-danger/30 text-sm text-danger">
                     {error}
                   </div>
                 )}
@@ -224,7 +224,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full px-6 py-3 bg-[#6c5ce7] text-white rounded-xl font-medium hover:bg-[#6c5ce7]/90 transition-colors disabled:opacity-50"
+                  className="w-full px-6 py-3 bg-accent-strong text-white rounded-xl font-medium hover:bg-accent-strong/90 transition-colors disabled:opacity-50"
                 >
                   {submitting ? "Submitting…" : "Join Waitlist"}
                 </button>
@@ -238,7 +238,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
 }
 
 const inputCls =
-  "w-full px-4 py-2.5 rounded-lg border border-[#e5e7eb] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6c5ce7]/20 focus:border-[#6c5ce7]";
+  "w-full px-4 py-2.5 rounded-lg border border-border bg-surface-alt text-foreground placeholder:text-muted text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent";
 
 function Field({
   label,
@@ -256,7 +256,7 @@ function Field({
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-sm font-medium text-foreground">
           {label}
-          {required && <span className="text-[#e17055]"> *</span>}
+          {required && <span className="text-danger"> *</span>}
         </span>
         {hint && <span className="text-xs text-muted">{hint}</span>}
       </div>

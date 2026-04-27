@@ -7,6 +7,7 @@ import {
   CATEGORIES,
   CATEGORY_COLORS,
   Category,
+  lightenForDark,
 } from "./agents";
 import { AgentCard } from "./AgentCard";
 import { AgentDetailModal } from "./AgentDetailModal";
@@ -64,12 +65,12 @@ export default function AgentsPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2">
             <img src="/logo.svg" alt="Callboard" className="w-8 h-8" />
             <span
-              className="font-bold text-lg tracking-wide"
+              className="font-bold text-lg tracking-wide text-foreground"
               style={{ fontFamily: "var(--font-dm-serif)" }}
             >
               Callboard
@@ -138,7 +139,7 @@ export default function AgentsPage() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search agents by name, capability, or use case…"
-                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-[#e5e7eb] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6c5ce7]/20 focus:border-[#6c5ce7]"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-surface text-foreground text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
                 />
               </div>
 
@@ -148,7 +149,7 @@ export default function AgentsPage() {
                   id="agent-sort"
                   value={sort}
                   onChange={(e) => setSort(e.target.value as SortKey)}
-                  className="appearance-none w-full sm:w-auto pl-4 pr-10 py-3 rounded-xl border border-[#e5e7eb] bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#6c5ce7]/20 focus:border-[#6c5ce7] cursor-pointer"
+                  className="appearance-none w-full sm:w-auto pl-4 pr-10 py-3 rounded-xl border border-border bg-surface text-foreground text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent cursor-pointer"
                 >
                   {SORTS.map((s) => (
                     <option key={s.key} value={s.key}>
@@ -174,7 +175,7 @@ export default function AgentsPage() {
               <div className="flex gap-2 pb-1 min-w-max">
                 <CategoryPill
                   label="All"
-                  color="#111827"
+                  color="#ededed"
                   active={activeCategory === "All"}
                   onClick={() => setActiveCategory("All")}
                 />
@@ -202,8 +203,8 @@ export default function AgentsPage() {
                     onClick={() => setMinRating(tier.min)}
                     className={`px-3 py-1 rounded-full border text-xs font-medium whitespace-nowrap transition-colors ${
                       active
-                        ? "border-[#6c5ce7] bg-[#6c5ce7]/10 text-[#6c5ce7]"
-                        : "border-[#e5e7eb] bg-white text-muted hover:border-[#6c5ce7]/40 hover:text-foreground"
+                        ? "border-accent bg-accent/15 text-accent"
+                        : "border-border bg-surface text-muted hover:border-accent/40 hover:text-foreground"
                     }`}
                   >
                     {tier.label}
@@ -225,7 +226,7 @@ export default function AgentsPage() {
                 <>
                   {" "}
                   in{" "}
-                  <span className="text-foreground" style={{ color: CATEGORY_COLORS[activeCategory] }}>
+                  <span style={{ color: lightenForDark(CATEGORY_COLORS[activeCategory]) }}>
                     {activeCategory}
                   </span>
                 </>
@@ -240,7 +241,7 @@ export default function AgentsPage() {
               <button
                 type="button"
                 onClick={clearAll}
-                className="text-xs text-[#6c5ce7] hover:underline"
+                className="text-xs text-accent hover:underline"
               >
                 Clear filters
               </button>
@@ -248,9 +249,9 @@ export default function AgentsPage() {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="text-center py-20 border border-dashed border-[#e5e7eb] rounded-2xl">
+            <div className="text-center py-20 border border-dashed border-border rounded-2xl bg-surface">
               <h3
-                className="text-xl mb-2"
+                className="text-xl mb-2 text-foreground"
                 style={{ fontFamily: "var(--font-dm-serif)" }}
               >
                 No agents match that search
@@ -262,7 +263,7 @@ export default function AgentsPage() {
               <button
                 type="button"
                 onClick={clearAll}
-                className="px-5 py-2.5 bg-[#6c5ce7] text-white rounded-xl text-sm font-medium hover:bg-[#6c5ce7]/90 transition-colors"
+                className="px-5 py-2.5 bg-accent-strong text-white rounded-xl text-sm font-medium hover:bg-accent-strong/90 transition-colors"
               >
                 Clear filters
               </button>
@@ -278,11 +279,11 @@ export default function AgentsPage() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto py-12 px-6 border-t border-[#e5e7eb]">
+      <footer className="mt-auto py-12 px-6 border-t border-border bg-background">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <img src="/logo.svg" alt="Callboard" className="w-6 h-6" />
-            <span className="text-sm font-medium">Callboard</span>
+            <span className="text-sm font-medium text-foreground">Callboard</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-muted">
             <a href="/agents" className="hover:text-foreground transition-colors">
@@ -329,15 +330,16 @@ function CategoryPill({
   active: boolean;
   onClick: () => void;
 }) {
+  const tint = lightenForDark(color);
   const activeStyle = {
-    backgroundColor: color,
-    borderColor: color,
-    color: "#ffffff",
+    backgroundColor: tint,
+    borderColor: tint,
+    color: "#0a0a0f",
   };
   const inactiveStyle = {
-    backgroundColor: `${color}0d`, // ~5% alpha
-    borderColor: `${color}33`, // ~20% alpha
-    color: color,
+    backgroundColor: `${tint}26`, // ~15% alpha
+    borderColor: `${tint}55`, // ~33% alpha
+    color: tint,
   };
   return (
     <button
@@ -350,3 +352,4 @@ function CategoryPill({
     </button>
   );
 }
+

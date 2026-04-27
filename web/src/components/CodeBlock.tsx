@@ -12,7 +12,7 @@ interface CodeBlockProps {
  */
 export function CodeBlock({ label, children }: CodeBlockProps) {
   return (
-    <div className="bg-[#0d0d12] rounded-2xl p-5 shadow-xl shadow-accent/5 border border-white/5 my-4">
+    <div className="bg-surface-dark rounded-2xl p-5 shadow-xl shadow-accent-strong/10 border border-border my-4">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
         <div className="w-3 h-3 rounded-full bg-[#febc2e]" />

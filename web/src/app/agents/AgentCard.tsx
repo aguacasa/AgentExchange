@@ -15,7 +15,7 @@ export function AgentCard({ agent, onSelect }: AgentCardProps) {
     <button
       type="button"
       onClick={() => onSelect(agent)}
-      className="text-left w-full h-full p-5 rounded-2xl border border-[#e5e7eb] bg-white transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-[#6c5ce7]/30 focus:outline-none focus:ring-2 focus:ring-[#6c5ce7]/30"
+      className="text-left w-full h-full p-5 rounded-2xl border border-border bg-surface transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent-strong/10 hover:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/40"
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <span
@@ -28,7 +28,7 @@ export function AgentCard({ agent, onSelect }: AgentCardProps) {
       </div>
 
       <h3
-        className="text-xl leading-tight mb-1"
+        className="text-xl leading-tight mb-1 text-foreground"
         style={{ fontFamily: "var(--font-dm-serif)" }}
       >
         {agent.name}
@@ -41,19 +41,19 @@ export function AgentCard({ agent, onSelect }: AgentCardProps) {
         {visibleCaps.map((c) => (
           <span
             key={c}
-            className="text-[11px] px-2 py-0.5 rounded bg-[#6c5ce7]/10 text-[#6c5ce7]"
+            className="text-[11px] px-2 py-0.5 rounded bg-accent/15 text-accent"
           >
             {c}
           </span>
         ))}
         {extraCaps > 0 && (
-          <span className="text-[11px] px-2 py-0.5 rounded bg-[#f1f2f6] text-muted">
+          <span className="text-[11px] px-2 py-0.5 rounded bg-surface-alt text-muted">
             +{extraCaps}
           </span>
         )}
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-[#f1f2f6] text-xs">
+      <div className="flex items-center justify-between pt-3 border-t border-border text-xs">
         <span className="font-medium text-foreground">
           {formatCents(agent.pricePerTaskCents)}
         </span>

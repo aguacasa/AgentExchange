@@ -162,10 +162,10 @@ const GROUPS = [
 ];
 
 const METHOD_COLOR: Record<string, string> = {
-  GET: "bg-[#00b894]/10 text-[#00b894]",
-  POST: "bg-[#6c5ce7]/10 text-[#6c5ce7]",
-  PUT: "bg-[#fdcb6e]/20 text-[#b8860b]",
-  DELETE: "bg-[#e17055]/10 text-[#e17055]",
+  GET: "bg-success/15 text-success",
+  POST: "bg-accent/15 text-accent",
+  PUT: "bg-warning/20 text-warning",
+  DELETE: "bg-danger/15 text-danger",
 };
 
 export default function ApiReferencePage() {
@@ -188,7 +188,7 @@ export default function ApiReferencePage() {
           href="http://localhost:3000/docs"
           target="_blank"
           rel="noreferrer"
-          className="px-4 py-2 rounded-lg bg-[#6c5ce7] text-white text-sm font-medium hover:bg-[#6c5ce7]/90"
+          className="px-4 py-2 rounded-lg bg-accent-strong text-white text-sm font-medium hover:bg-accent-strong/90"
         >
           Open Swagger UI ↗
         </a>
@@ -196,7 +196,7 @@ export default function ApiReferencePage() {
           href="http://localhost:3000/openapi.json"
           target="_blank"
           rel="noreferrer"
-          className="px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-[#f8f9fa]"
+          className="px-4 py-2 rounded-lg border border-border text-foreground text-sm font-medium hover:bg-surface-alt"
         >
           Download OpenAPI JSON ↗
         </a>
@@ -212,7 +212,7 @@ export default function ApiReferencePage() {
           </h2>
           <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-sm">
-              <thead className="bg-[#f8f9fa] text-left text-xs uppercase tracking-wider text-muted">
+              <thead className="bg-surface-alt text-left text-xs uppercase tracking-wider text-muted">
                 <tr>
                   <th className="px-4 py-3 font-medium">Method</th>
                   <th className="px-4 py-3 font-medium">Path</th>
@@ -221,19 +221,19 @@ export default function ApiReferencePage() {
                   <th className="px-4 py-3 font-medium">Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-white">
+              <tbody className="divide-y divide-border bg-surface">
                 {group.endpoints.map((e) => (
                   <tr key={e.method + e.path}>
                     <td className="px-4 py-3">
                       <span
                         className={`font-mono text-xs font-medium px-2 py-0.5 rounded ${
-                          METHOD_COLOR[e.method] ?? "bg-gray-100"
+                          METHOD_COLOR[e.method] ?? "bg-surface-alt text-muted"
                         }`}
                       >
                         {e.method}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs">{e.path}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-foreground">{e.path}</td>
                     <td className="px-4 py-3 text-xs text-muted">{e.scope}</td>
                     <td className="px-4 py-3 font-mono text-xs text-muted">
                       {e.body}
@@ -247,7 +247,7 @@ export default function ApiReferencePage() {
         </section>
       ))}
 
-      <div className="p-5 rounded-xl bg-[#f8f9fa] border border-border text-sm text-muted mt-8">
+      <div className="p-5 rounded-xl bg-surface-alt border border-border text-sm text-muted mt-8">
         <strong className="text-foreground">Staying current.</strong> This page
         is maintained alongside the controllers in{" "}
         <code>src/controllers/**</code>. The CI drift-check fails a PR if{" "}

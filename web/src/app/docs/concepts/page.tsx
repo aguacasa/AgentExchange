@@ -59,7 +59,7 @@ export default function ConceptsPage() {
 
       <div className="overflow-x-auto rounded-xl border border-border mb-6">
         <table className="w-full text-sm">
-          <thead className="bg-[#f8f9fa] text-left text-xs uppercase tracking-wider text-muted">
+          <thead className="bg-surface-alt text-left text-xs uppercase tracking-wider text-muted">
             <tr>
               <th className="px-4 py-3 font-medium">From</th>
               <th className="px-4 py-3 font-medium">To</th>
@@ -67,11 +67,11 @@ export default function ConceptsPage() {
               <th className="px-4 py-3 font-medium">Side effect</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border bg-white">
+          <tbody className="divide-y divide-border bg-surface text-foreground">
             {LIFECYCLE.map((row, i) => (
               <tr key={i}>
                 <td className="px-4 py-3 font-mono text-xs">{row.from}</td>
-                <td className="px-4 py-3 font-mono text-xs text-[#6c5ce7]">
+                <td className="px-4 py-3 font-mono text-xs text-accent">
                   {row.to}
                 </td>
                 <td className="px-4 py-3 text-muted">{row.trigger}</td>
@@ -128,18 +128,18 @@ export default function ConceptsPage() {
       </p>
       <div className="overflow-x-auto rounded-xl border border-border mb-6">
         <table className="w-full text-sm">
-          <thead className="bg-[#f8f9fa] text-left text-xs uppercase tracking-wider text-muted">
+          <thead className="bg-surface-alt text-left text-xs uppercase tracking-wider text-muted">
             <tr>
               <th className="px-4 py-3 font-medium">Signal</th>
               <th className="px-4 py-3 font-medium">Weight</th>
               <th className="px-4 py-3 font-medium">Notes</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border bg-white">
+          <tbody className="divide-y divide-border bg-surface text-foreground">
             {WEIGHTS.map((row) => (
               <tr key={row.signal}>
                 <td className="px-4 py-3 font-medium">{row.signal}</td>
-                <td className="px-4 py-3 font-mono text-xs text-[#6c5ce7]">
+                <td className="px-4 py-3 font-mono text-xs text-accent">
                   {row.weight}
                 </td>
                 <td className="px-4 py-3 text-muted">{row.notes}</td>
