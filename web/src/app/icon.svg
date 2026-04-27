@@ -1,12 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="7" fill="#D4A574"/>
-  <circle cx="5" cy="5.5" r="0.6" fill="#C4956A" opacity="0.5"/>
-  <circle cx="27" cy="7" r="0.5" fill="#C4956A" opacity="0.4"/>
-  <circle cx="6" cy="26" r="0.5" fill="#C4956A" opacity="0.45"/>
-  <circle cx="26" cy="25" r="0.6" fill="#C4956A" opacity="0.4"/>
-  <path d="M19.8 10.2c-1.1-.6-2.5-1-4.1-1-5 0-8.2 3.6-8.2 8.4s3.2 8.4 8.2 8.4c1.6 0 3-.4 4.1-1" stroke="white" stroke-width="3.6" stroke-linecap="round" fill="none"/>
-  <circle cx="25.5" cy="6.5" r="2.2" fill="#E17055"/>
-  <circle cx="25.5" cy="6.5" r="0.9" fill="#C0392B"/>
-  <circle cx="6.5" cy="25.5" r="2.2" fill="#6C5CE7"/>
-  <circle cx="6.5" cy="25.5" r="0.9" fill="#4834D4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+
+  <defs>
+    <pattern id="cork01" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="#c69a6b"></rect>
+      <circle cx="1" cy="1" r="0.45" fill="#a87a4c" opacity="0.55"></circle>
+      <circle cx="3" cy="3" r="0.35" fill="#8f6438" opacity="0.4"></circle>
+      <circle cx="3.2" cy="1.2" r="0.25" fill="#e0b58a" opacity="0.5"></circle>
+      <circle cx="0.8" cy="3.2" r="0.3" fill="#6f4a22" opacity="0.35"></circle>
+    </pattern>
+    <clipPath id="clip01"><rect x="0" y="0" width="256" height="256" rx="48" ry="48"></rect></clipPath>
+  </defs>
+  <g clip-path="url(#clip01)">
+    <rect width="256" height="256" fill="url(#cork01)"></rect>
+    <rect width="256" height="256" fill="#c69a6b" opacity="0.25"></rect>
+
+    <path d="M128 52&#xA;             a76 76 0 1 0 0 152&#xA;             a76 76 0 0 0 65.8 -38&#xA;             l-38.1 -22&#xA;             a32 32 0 1 1 0 -32&#xA;             l38.1 -22&#xA;             A76 76 0 0 0 128 52 z" fill="#14110e"></path>
+
+    <circle cx="192" cy="128" r="9" fill="#14110e" opacity="0.22"></circle>
+    <circle cx="190" cy="126" r="7" fill="#d94a3d"></circle>
+    <circle cx="188" cy="124" r="2" fill="#ffb3ab" opacity="0.8"></circle>
+  </g>
 </svg>

@@ -15,9 +15,9 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo-mark.svg" alt="Callboard" className="w-8 h-8" />
+            <img src="/logo.svg" alt="Callboard" className="w-8 h-8" />
             <span
-              className="font-bold text-lg tracking-tight"
+              className="font-bold text-lg tracking-wide"
               style={{ fontFamily: "var(--font-dm-serif)" }}
             >
               Callboard
