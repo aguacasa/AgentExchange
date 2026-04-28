@@ -1,8 +1,11 @@
 import { Request } from "express";
 import { hashApiKey } from "../utils/hash";
-import { AuthenticatedRequest } from "./auth";
+import { AuthenticatedRequest, SESSION_COOKIE_NAME } from "./auth";
 import { ForbiddenError, UnauthorizedError } from "../utils/errors";
 import prisma from "../utils/prisma";
+import { authService } from "../services/auth.service";
+
+type CookieRequest = Request & { cookies?: Record<string, string | undefined> };
 
 export async function expressAuthentication(
   request: Request,
@@ -34,6 +37,22 @@ export async function expressAuthentication(
     };
 
     return apiKey;
+  }
+
+  if (securityName === "session") {
+    const cookieToken = (request as CookieRequest).cookies?.[SESSION_COOKIE_NAME];
+    const user = await authService.resolveSession(cookieToken);
+    if (!user) throw new UnauthorizedError("Not signed in");
+
+    if (scopes && scopes.length > 0) {
+      const requiredRoles = scopes.map((s) => s.toUpperCase());
+      if (!requiredRoles.includes(user.role)) {
+        throw new ForbiddenError(`Insufficient role. Required one of: ${requiredRoles.join(", ")}`);
+      }
+    }
+
+    (request as AuthenticatedRequest).user = user;
+    return user;
   }
 
   throw new UnauthorizedError(`Unsupported security: ${securityName}`);

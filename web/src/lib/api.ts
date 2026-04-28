@@ -16,11 +16,20 @@ export function clearStoredApiKey(): void {
   localStorage.removeItem(API_KEY_STORAGE);
 }
 
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const apiKey = getStoredApiKey();
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
+    // credentials:include sends the cb_session cookie cross-origin (web→api).
+    // Required by the new session auth scheme; harmless when only X-API-Key is in play.
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(apiKey ? { "X-API-Key": apiKey } : {}),
@@ -30,9 +39,12 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error?.message || `API error: ${res.status}`);
+    throw new ApiError(res.status, body?.error?.message || `API error: ${res.status}`);
   }
 
+  // 202 from /auth/magic-link has no JSON body when caller doesn't read one;
+  // also handle 204s defensively.
+  if (res.status === 204) return undefined as T;
   return res.json();
 }
 
@@ -96,6 +108,14 @@ export interface ApiKeyInfo {
   lastUsedAt: string | null;
   expiresAt: string | null;
   revoked: boolean;
+  createdAt: string;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string | null;
+  role: "USER" | "ADMIN" | "SUPERADMIN";
   createdAt: string;
 }
 
@@ -209,6 +229,20 @@ export const api = {
       apiFetch<{ key: ApiKeyInfo; message: string }>(`/api-keys/${id}`, {
         method: "DELETE",
       }),
+  },
+  auth: {
+    requestMagicLink: (email: string) =>
+      apiFetch<{ status: "accepted" }>("/auth/magic-link", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      }),
+    verify: (token: string) =>
+      apiFetch<{ user: AuthUser }>("/auth/verify", {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      }),
+    me: () => apiFetch<{ user: AuthUser }>("/auth/me"),
+    logout: () => apiFetch<{ status: "ok" }>("/auth/logout", { method: "POST" }),
   },
   health: () => apiFetch<{ status: string; service: string; version: string }>("/health"),
 };
