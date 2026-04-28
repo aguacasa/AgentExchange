@@ -10,7 +10,7 @@
     "start:worker": "node dist/worker.js",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "db:seed": "ts-node prisma/seed.ts",
+    "db:seed": "node scripts/db-seed.js",
     "spec": "tsoa spec",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",
+    "@sentry/node": "^10.50.0",
     "@types/pg": "^8.20.0",
     "cors": "^2.8.6",
     "crypto-js": "^4.2.0",

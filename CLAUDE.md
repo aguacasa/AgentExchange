@@ -9,9 +9,10 @@ This file is the authoritative briefing for any Claude session working on Callbo
 - **Backend** — Express 5 + TypeScript + tsoa + Prisma/Postgres at the repo root (`src/`, `prisma/`, `tests/`).
 - **Frontend** — Next.js 16 + React 19 App Router under `web/`.
 - **MCP server** — `@callboard/mcp`, a buyer-side [Model Context Protocol](https://modelcontextprotocol.io) server that exposes 8 tools to Claude Desktop / Claude Code / any MCP client. Lives at `mcp/`.
-- **Infra** — Docker Compose for Postgres 16 + Redis 7 in `docker-compose.yml`.
+- **Local infra** — Docker Compose for Postgres 16 + Redis 7 in `docker-compose.yml`.
+- **Production infra** — Hetzner CPX21 VPS running Coolify v4, fronted by Cloudflare (DNS/CDN/WAF), with daily Postgres dumps to Cloudflare R2 and UptimeRobot probes. Live at `https://getcallboard.com` since 2026-04-27.
 
-For full detail see [README.md](README.md). For the user-facing docs site, see `web/src/app/docs/*` (served at `/docs` on the frontend).
+For full detail see [README.md](README.md). For operating the production deployment (deploys, restarts, logs, restore from backup, known issues), see [OPERATIONS.md](OPERATIONS.md). For the user-facing product docs site, see `web/src/app/docs/*` (served at `/docs` on the frontend).
 
 ## Commands (run from repo root unless noted)
 
@@ -49,6 +50,8 @@ For full detail see [README.md](README.md). For the user-facing docs site, see `
 | Anything user-facing above that affects the onboarding flow | Update `web/src/app/docs/quickstart/page.tsx` |
 
 If you create a new doc page, add it to the `NAV` array in `web/src/components/DocsSidebar.tsx` **and** to the table in `README.md` under "Documentation".
+
+If you change anything that affects how production is deployed, accessed, or operated (Dockerfile, GitHub Actions, env-var contracts, infra topology, secret locations, monitoring), update [OPERATIONS.md](OPERATIONS.md) in the same PR. README and OPERATIONS share a "Production" pointer — keep them consistent.
 
 ## Code conventions observed in this repo
 

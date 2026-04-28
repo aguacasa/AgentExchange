@@ -6,20 +6,17 @@
  *
  * After seeding, use the printed API keys to authenticate API requests:
  *   curl -H "X-API-Key: <key>" http://localhost:3000/agents
+ *
+ * Lives under src/ (not prisma/) so tsc compiles it to dist/seed.js — that's
+ * what the production container actually runs, since src/ isn't shipped in the
+ * runtime image.
  */
-import { PrismaClient } from "../src/generated/prisma";
-import { hashApiKey } from "../src/utils/hash";
+import dotenv from "dotenv";
+dotenv.config();
+
 import crypto from "crypto";
-
-const prisma = new PrismaClient();
-
-// Generate a key and return both the raw key and hash
-function makeKey() {
-  const key = `cb_${crypto.randomBytes(32).toString("hex")}`;
-  const prefix = key.substring(0, 11);
-  const hash = hashApiKey(key);
-  return { key, prefix, hash };
-}
+import prisma from "./utils/prisma";
+import { generateApiKey } from "./utils/hash";
 
 async function main() {
   console.log("🌱 Seeding Callboard database...\n");
@@ -33,8 +30,8 @@ async function main() {
 
   // ─── Owner keys (for dashboard authentication) ───────────────────────
 
-  const ownerAKey = makeKey();
-  const ownerBKey = makeKey();
+  const ownerAKey = generateApiKey();
+  const ownerBKey = generateApiKey();
 
   // ─── Agents ──────────────────────────────────────────────────────────
 

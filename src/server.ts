@@ -1,6 +1,19 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import * as Sentry from "@sentry/node";
+
+// DSN-gated: production sets SENTRY_DSN in Coolify; dev/test leaves it unset
+// and Sentry stays a no-op. Init must happen before route registration so
+// setupExpressErrorHandler later in the file can hook into the right handlers.
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV ?? "development",
+    tracesSampleRate: 0,
+  });
+}
+
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -16,6 +29,11 @@ import { validateProdEnv } from "./config/env";
 validateProdEnv();
 
 const app = express();
+
+// Production sits behind Cloudflare → Traefik → app. Trust exactly one hop
+// (Traefik) so express-rate-limit keys off the real client IP from
+// X-Forwarded-For instead of bucketing all traffic under Traefik's container IP.
+app.set("trust proxy", 1);
 
 // Middleware
 app.use(helmet());
@@ -86,6 +104,12 @@ try {
   app.get("/openapi.json", (_req, res) => res.json(spec));
 } catch {
   console.warn("OpenAPI spec not generated yet. Run `npm run spec` first.");
+}
+
+// Sentry's Express error handler must be registered after routes but before
+// our own error handler so it can capture exceptions before they're normalized.
+if (process.env.SENTRY_DSN) {
+  Sentry.setupExpressErrorHandler(app);
 }
 
 // Error handler (must be after routes)
