@@ -30,7 +30,7 @@ FROM node:22-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN apk add --no-cache libc6-compat tini
+RUN apk add --no-cache libc6-compat tini curl
 
 # Keep node_modules from builder so the prisma CLI is available at container
 # startup to run `prisma migrate deploy`. Adds ~150MB; acceptable tradeoff for

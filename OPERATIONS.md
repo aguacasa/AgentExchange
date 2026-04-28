@@ -13,6 +13,7 @@ This document is the source of truth for how the production system is wired and 
 - [Live URLs](#live-urls)
 - [System inventory](#system-inventory)
 - [Account & credential inventory](#account--credential-inventory)
+- [Environment variables](#environment-variables)
 - [Access](#access)
 - [Common operational tasks](#common-operational-tasks)
 - [Monitoring & alerting](#monitoring--alerting)
@@ -109,7 +110,40 @@ Ownership / billing lives on these accounts (operator: nick@visualized.tech as o
 - **Hetzner Cloud** — VPS billing, weekly snapshot retention
 - **GitHub** — repo + GitHub App (`aguacasa/callboard`)
 - **UptimeRobot** — monitor + email alert routing
-- **Sentry** — to be created and DSN added to `~/Desktop/Callboard/secrets-DO-NOT-COMMIT/sentry.env`, then set as `SENTRY_DSN` env var on `callboard-api` in Coolify
+- **Sentry** — `visualized-technologies` org, `callboard-api` project. DSN in `~/Desktop/Callboard/secrets-DO-NOT-COMMIT/sentry.env`, set as `SENTRY_DSN` on callboard-api in Coolify
+
+---
+
+## Environment variables
+
+The source of truth for what's *required* in production is `src/config/env.ts` (`validateProdEnv()`). The container refuses to start if any of the marked variables are missing — by design, but it means a deploy will silently roll back if you add a required var to the validator without also setting it in Coolify.
+
+**Every time you add a required var to `validateProdEnv()`, update the table below in the same PR.** That way the next operator merging the PR knows what to add to Coolify before triggering the deploy.
+
+### `callboard-api`
+
+| Variable | Required in prod? | Purpose | Source |
+|---|---|---|---|
+| `DATABASE_URL` | Yes | Postgres connection string. Coolify wires the internal Docker hostname automatically. | Coolify resource link |
+| `API_KEY_SALT` | Yes | HMAC salt for API-key hashing. **Rotating invalidates every issued key.** | `~/Desktop/Callboard/secrets-DO-NOT-COMMIT/callboard-prod.env` |
+| `CORS_ORIGINS` | Yes | Comma-separated list of allowed origins (e.g. `https://getcallboard.com,https://www.getcallboard.com`) | hand-set in Coolify |
+| `WEB_URL` | Yes | Base URL of the Next.js app, used to build magic-link callback URLs | hand-set in Coolify (`https://getcallboard.com`) |
+| `REDIS_URL` | No (recommended) | Backs `express-rate-limit` distributed store. Coolify resource link. | Coolify resource link |
+| `SENTRY_DSN` | No | Activates `@sentry/node`. Empty = no-op. | `~/Desktop/Callboard/secrets-DO-NOT-COMMIT/sentry.env` |
+| `NODE_ENV` | Yes | Coolify sets this to `production` automatically | Coolify default |
+| `PORT` | No | Defaults to `3000`. Don't change without also updating Traefik. | n/a |
+| `WORKER_DISABLED` | No | Set to `"true"` if running the background worker as a separate container | n/a |
+
+### `callboard-web`
+
+| Variable | Required in prod? | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | Yes | Baked into the client bundle at build time. Must be `https://api.getcallboard.com` for prod. |
+| `NODE_ENV` | Yes | `production`, set by Coolify |
+
+### Setting / changing a variable
+
+Coolify → app → **Environment Variables** → edit row → Save → **Restart**. See the gotchas in [Add or change an environment variable](#add-or-change-an-environment-variable).
 
 ---
 
@@ -145,6 +179,21 @@ Both are Docker-internal only. To poke around:
 
 ## Common operational tasks
 
+### Anatomy of a deploy
+
+A push to `main` fires one GitHub App webhook to Coolify. Coolify then fans it out to every app subscribed to that branch, **independently**. The four assets behave differently:
+
+| Asset | Reacts to git push? | Source |
+|---|---|---|
+| `callboard-api` | Yes — rebuilds image, runs `prisma migrate deploy`, swaps container | `Dockerfile` at repo root |
+| `callboard-web` | Yes — rebuilds image, swaps container | `web/Dockerfile` |
+| `callboard-postgres` | No — managed Coolify resource. Only changes on manual restart, version upgrade, or env-var change | Coolify Postgres template |
+| `callboard-redis` | No — same as postgres | Coolify Redis template |
+
+By default, each app rebuilds on **any** push to `main` (no path filtering). So a markdown-only PR still triggers a ~2-min API rebuild + a ~2-min web rebuild. Tolerable; if it ever isn't, set per-app **Watch Paths** in Coolify (e.g. `callboard-web` → `web/**`).
+
+Coolify decides between **rebuild** and **restart** automatically: a code push or a build-time env-var change triggers a rebuild; a runtime-only env-var change just restarts. The line between the two is fuzzy in the UI — when in doubt, expect a rebuild.
+
 ### Deploy a code change
 
 1. PR into `main` on GitHub. CI runs (`backend`, `web`, `mcp` jobs in `.github/workflows/ci.yml`).
@@ -153,6 +202,8 @@ Both are Docker-internal only. To poke around:
 4. If the build fails, the previous container keeps serving. Fix forward.
 
 > **Don't** push directly to `main` and then wonder why the deploy didn't happen — the webhook fires only on push events that match the configured branch, but CI gates a real PR. Always go through PR.
+
+> **If you add a new required env var** (anything that ends up in `validateProdEnv()` at `src/config/env.ts`), add it to the table in [Environment variables](#environment-variables) below **and** set it in Coolify *before* the merge lands. Otherwise the next deploy will pass the build, refuse to start, roll back, and leave you on the old image silently. Coolify won't tell you a deploy rolled back unless you go look at the Deployments tab.
 
 ### Restart a service (no rebuild)
 
@@ -281,18 +332,7 @@ If the Hetzner box is gone:
 
 ## Known issues
 
-The three items deferred from the initial deploy were addressed in the follow-up PR (seed-in-prod fix, `trust proxy: 1`, Sentry SDK wired DSN-gated). Remaining operator action:
-
-### Sentry — create the account and wire the DSN
-
-The code is in place: `Sentry.init` runs only when `SENTRY_DSN` is set, and `Sentry.setupExpressErrorHandler(app)` is registered before our error handler. To activate:
-
-1. Create a Sentry org + Node project at https://sentry.io
-2. Copy the DSN into `~/Desktop/Callboard/secrets-DO-NOT-COMMIT/sentry.env`
-3. Coolify → callboard-api → Environment Variables → add `SENTRY_DSN=<dsn>` → Save → Restart
-4. Verify: trigger a 500 (e.g. hit a malformed protected route) and confirm it shows up in Sentry within ~30s
-
-No DSN = Sentry stays a no-op. Safe to leave unset in dev/test.
+None blocking. Closed out 2026-04-28: seed-in-prod, `trust proxy: 1`, Sentry SDK + DSN, and `curl` in the runtime image (so Coolify's healthcheck doesn't ride on `Return code: 0` from a missing binary). All four shipped together with the initial-deploy follow-up.
 
 ---
 
