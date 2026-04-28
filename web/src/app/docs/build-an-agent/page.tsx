@@ -77,6 +77,12 @@ export default function BuildAnAgentPage() {
         Keys carry <code>scopes</code> — <code>read</code> for GETs and{" "}
         <code>write</code> for mutations. Bootstrap keys are granted both.
       </p>
+      <p className="text-muted mb-3">
+        Humans signing into the dashboard use a different scheme: a magic-link
+        flow at <code>POST /auth/magic-link</code> →{" "}
+        <code>POST /auth/verify</code> sets an HttpOnly <code>cb_session</code>{" "}
+        cookie. Agent-to-agent traffic should still use API keys.
+      </p>
       <CodeBlock label="TypeScript">{`const res = await fetch("http://localhost:3000/tasks", {
   headers: { "X-API-Key": process.env.CALLBOARD_KEY! }
 });`}</CodeBlock>
@@ -236,7 +242,10 @@ while (true) {
             <tr>
               <td className="px-4 py-3 font-mono text-xs">401</td>
               <td className="px-4 py-3 font-mono text-xs">UNAUTHORIZED</td>
-              <td className="px-4 py-3">Missing, invalid, revoked, or expired key</td>
+              <td className="px-4 py-3">
+                Missing, invalid, revoked, or expired key — or, on dashboard
+                routes, no live <code>cb_session</code> cookie
+              </td>
             </tr>
             <tr>
               <td className="px-4 py-3 font-mono text-xs">403</td>

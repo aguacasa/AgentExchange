@@ -27,6 +27,24 @@ async function main() {
   await prisma.taskContract.deleteMany();
   await prisma.apiKey.deleteMany();
   await prisma.agent.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.magicLinkToken.deleteMany();
+  await prisma.user.deleteMany();
+
+  // ─── Users ───────────────────────────────────────────────────────────
+  // Stable IDs match the literal `ownerId` strings the rest of the seed
+  // already uses, so when VIS-79 follow-up tightens ownerId → userId FK
+  // the data is already consistent.
+
+  const alice = await prisma.user.create({
+    data: { id: "owner-alice", email: "alice@example.com", name: "Alice Buyer" },
+  });
+  const bob = await prisma.user.create({
+    data: { id: "owner-bob", email: "bob@example.com", name: "Bob Seller" },
+  });
+  console.log(`👤  Created users: ${alice.email}, ${bob.email}`);
+  console.log("    Sign in with either email at http://localhost:3001/login");
+  console.log("    (the magic link will be logged to this terminal)\n");
 
   // ─── Owner keys (for dashboard authentication) ───────────────────────
 

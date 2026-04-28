@@ -28,6 +28,13 @@ export function validateProdEnv(): void {
     errors.push("DATABASE_URL is missing.");
   }
 
+  if (!process.env.WEB_URL) {
+    errors.push(
+      "WEB_URL must be set in production (e.g. https://getcallboard.com). " +
+        "Used to build magic-link callback URLs."
+    );
+  }
+
   if (errors.length > 0) {
     console.error("\n✗ Production environment is misconfigured. Refusing to start:\n");
     for (const e of errors) console.error(`  • ${e}`);

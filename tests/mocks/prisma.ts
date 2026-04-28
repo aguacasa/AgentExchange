@@ -8,7 +8,9 @@ function createModelMock() {
     create: vi.fn(),
     update: vi.fn(),
     updateMany: vi.fn(),
+    upsert: vi.fn(),
     delete: vi.fn(),
+    deleteMany: vi.fn(),
     count: vi.fn(),
   };
 }
@@ -20,6 +22,9 @@ export const prismaMock = {
   transaction: createModelMock(),
   reputationEvent: createModelMock(),
   waitlistSignup: createModelMock(),
+  user: createModelMock(),
+  session: createModelMock(),
+  magicLinkToken: createModelMock(),
   $transaction: vi.fn((fn: (tx: any) => Promise<any>) => fn(prismaMock)),
 };
 
