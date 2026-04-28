@@ -14,22 +14,9 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { PrismaPg } from "@prisma/adapter-pg";
-import pg from "pg";
-import { PrismaClient } from "./generated/prisma/client";
-import { hashApiKey } from "./utils/hash";
 import crypto from "crypto";
-
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
-
-// Generate a key and return both the raw key and hash
-function makeKey() {
-  const key = `cb_${crypto.randomBytes(32).toString("hex")}`;
-  const prefix = key.substring(0, 11);
-  const hash = hashApiKey(key);
-  return { key, prefix, hash };
-}
+import prisma from "./utils/prisma";
+import { generateApiKey } from "./utils/hash";
 
 async function main() {
   console.log("🌱 Seeding Callboard database...\n");
@@ -43,8 +30,8 @@ async function main() {
 
   // ─── Owner keys (for dashboard authentication) ───────────────────────
 
-  const ownerAKey = makeKey();
-  const ownerBKey = makeKey();
+  const ownerAKey = generateApiKey();
+  const ownerBKey = generateApiKey();
 
   // ─── Agents ──────────────────────────────────────────────────────────
 
