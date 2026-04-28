@@ -22,6 +22,7 @@ RUN npx prisma generate
 # Source + config, then build (tsoa spec-and-routes, then tsc).
 COPY tsconfig.json tsoa.json ./
 COPY src ./src
+COPY scripts ./scripts
 RUN npm run build
 
 # ─── runtime ────────────────────────────────────────────────────────────────
@@ -39,6 +40,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder /app/scripts ./scripts
 COPY package.json ./
 
 RUN addgroup -S callboard && adduser -S callboard -G callboard \

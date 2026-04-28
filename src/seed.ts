@@ -6,12 +6,22 @@
  *
  * After seeding, use the printed API keys to authenticate API requests:
  *   curl -H "X-API-Key: <key>" http://localhost:3000/agents
+ *
+ * Lives under src/ (not prisma/) so tsc compiles it to dist/seed.js — that's
+ * what the production container actually runs, since src/ isn't shipped in the
+ * runtime image.
  */
-import { PrismaClient } from "../src/generated/prisma";
-import { hashApiKey } from "../src/utils/hash";
+import dotenv from "dotenv";
+dotenv.config();
+
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
+import { PrismaClient } from "./generated/prisma/client";
+import { hashApiKey } from "./utils/hash";
 import crypto from "crypto";
 
-const prisma = new PrismaClient();
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
 // Generate a key and return both the raw key and hash
 function makeKey() {
