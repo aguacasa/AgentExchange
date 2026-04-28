@@ -36,3 +36,6 @@ README.md
 docker-compose*.yml
 Dockerfile
 scripts
+# …but db-seed.js is the wrapper invoked by `npm run db:seed` inside the
+# prod container, so it has to ship in the image. Re-include it.
+!scripts/db-seed.js
