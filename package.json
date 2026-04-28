@@ -25,7 +25,9 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",
     "@sentry/node": "^10.50.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/pg": "^8.20.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "crypto-js": "^4.2.0",
     "dotenv": "^17.4.1",
