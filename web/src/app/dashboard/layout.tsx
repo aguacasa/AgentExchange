@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import DashboardAuthGate from "@/components/DashboardAuthGate";
 
 const NAV_ITEMS = [
   {
@@ -50,6 +51,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   return (
+    <DashboardAuthGate>
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <aside className="w-64 bg-surface border-r border-border flex flex-col">
@@ -99,5 +101,6 @@ export default function DashboardLayout({
         <div className="p-8">{children}</div>
       </main>
     </div>
+    </DashboardAuthGate>
   );
 }
