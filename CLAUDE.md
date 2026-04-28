@@ -89,3 +89,4 @@ Style tokens (reused across dashboard and docs):
 4. If you touched any path in the *Documentation invariants* table, the matching doc is updated in the same PR
 5. `cd web && npm run build` passes if you touched anything under `web/`
 6. `cd mcp && npm run build && npm run smoke` passes if you touched anything under `mcp/` (the smoke test needs the API running on `localhost:3000`)
+7. If you touched `Dockerfile`, `.dockerignore`, or anything that changes the build context (e.g. adding a new `COPY` source path), run `docker build .` locally and confirm it completes. `npm run build` does **not** exercise Docker — it only catches TS errors. The 2026-04-28 prod deploy broke because a `COPY scripts ./scripts` was added without re-including `scripts/` in `.dockerignore`; `npm test` and `npm run build` both passed, and Coolify was the first thing that actually exercised the COPY.
